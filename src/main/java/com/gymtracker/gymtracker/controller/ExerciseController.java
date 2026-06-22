@@ -3,6 +3,12 @@ package com.gymtracker.gymtracker.controller;
 import com.gymtracker.gymtracker.dto.ExerciseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.service.ExerciseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Exercises", description = "Manage exercises and their muscle groups")
 @RestController
 @RequestMapping("/api/exercises")
 public class ExerciseController {
@@ -20,18 +27,43 @@ public class ExerciseController {
         this.exerciseService = exerciseService;
     }
 
+    @Operation(summary = "Get all exercises")
+    @ApiResponse(responseCode = "200", description = "List of all exercises")
     @GetMapping
     public ResponseEntity<List<Exercise>> getAll() {
         return ResponseEntity.ok(exerciseService.getAllExercises());
     }
 
+    @Operation(summary = "Create a new exercise")
+    @ApiResponse(responseCode = "201", description = "Exercise created")
+    @ApiResponse(responseCode = "400", description = "Validation failed",
+            content = @Content(mediaType = "application/json", examples = @ExampleObject(
+                    value = """
+                            {
+                              "name": "Exercise name cannot be blank",
+                              "muscleGroup": "Muscle group must be specified"
+                            }"""
+            )))
     @PostMapping
     public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
     }
 
+    @Operation(summary = "Delete an exercise by ID")
+    @ApiResponse(responseCode = "204", description = "Exercise deleted")
+    @ApiResponse(responseCode = "404", description = "Exercise not found",
+            content = @Content(mediaType = "application/json", examples = @ExampleObject(
+                    value = """
+                            {
+                              "title": "Not Found",
+                              "status": 404,
+                              "detail": "Exercise not found",
+                              "instance": "/api/exercises/99"
+                            }"""
+            )))
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "Exercise ID") @PathVariable Long id) {
         exerciseService.deleteExercise(id);
         return ResponseEntity.noContent().build();
     }

@@ -41,11 +41,11 @@ public class WorkoutSessionService {
         return new WorkoutSessionDetailResponse(session.getId(), session.getDate(), session.getNote(), sets);
     }
 
-    public WorkoutSession saveWorkoutSession(WorkoutSessionDTO dto) {
+    public WorkoutSessionResponse saveWorkoutSession(WorkoutSessionDTO dto) {
         WorkoutSession session = new WorkoutSession();
         session.setDate(dto.getDate());
         session.setNote(dto.getNote());
-        return workoutSessionRepository.save(session);
+        return WorkoutSessionResponse.from(workoutSessionRepository.save(session));
     }
 
     public void deleteWorkoutSession(Long id) {
