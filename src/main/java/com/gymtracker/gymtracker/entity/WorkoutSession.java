@@ -15,6 +15,9 @@ public class WorkoutSession {
     private Long id;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     private LocalDate date;
 
     private String note;
@@ -28,6 +31,14 @@ public class WorkoutSession {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public LocalDate getDate() {

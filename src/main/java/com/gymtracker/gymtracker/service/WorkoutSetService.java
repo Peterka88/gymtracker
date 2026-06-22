@@ -18,27 +18,33 @@ public class WorkoutSetService {
     private final WorkoutSetRepository workoutSetRepository;
     private final ExerciseService exerciseService;
     private final WorkoutSessionService workoutSessionService;
+    private final PersonalRecordsService personalRecordsService;
 
     public WorkoutSetService(WorkoutSetRepository workoutSetRepository,
                              ExerciseService exerciseService,
-                             WorkoutSessionService workoutSessionService) {
+                             WorkoutSessionService workoutSessionService,
+                             PersonalRecordsService personalRecordsService) {
         this.workoutSetRepository = workoutSetRepository;
         this.exerciseService = exerciseService;
         this.workoutSessionService = workoutSessionService;
+        this.personalRecordsService = personalRecordsService;
     }
 
     public WorkoutSetResponse createWorkoutSet(WorkoutSetDTO dto) {
-        return toResponse(workoutSetRepository.save(mapDtoToSet(new WorkoutSet(), dto)));
+        WorkoutSet saved = workoutSetRepository.save(mapDtoToSet(new WorkoutSet(), dto));
+        boolean isPR = personalRecordsService.checkAndUpdate(saved);
+        return WorkoutSetResponse.from(saved, isPR);
     }
 
     public List<WorkoutSetResponse> getAllWorkoutSets() {
+        var prWeights = personalRecordsService.getPrWeightByExercise();
         return workoutSetRepository.findAll().stream()
-                .map(this::toResponse)
+                .map(set -> WorkoutSetResponse.from(set, prWeights))
                 .collect(Collectors.toList());
     }
 
     public WorkoutSetResponse getWorkoutSetById(Long id) {
-        return toResponse(workoutSetRepository.findById(id)
+        return WorkoutSetResponse.from(workoutSetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found")));
     }
 
@@ -55,7 +61,7 @@ public class WorkoutSetService {
             set.setReps(dto.getReps());
         if (dto.getNote() != null)
             set.setNote(dto.getNote());
-        return toResponse(workoutSetRepository.save(set));
+        return WorkoutSetResponse.from(workoutSetRepository.save(set));
     }
 
     public void deleteWorkoutSet(Long id) {
@@ -71,7 +77,4 @@ public class WorkoutSetService {
         return set;
     }
 
-    private WorkoutSetResponse toResponse(WorkoutSet set) {
-        return WorkoutSetResponse.from(set);
-    }
 }

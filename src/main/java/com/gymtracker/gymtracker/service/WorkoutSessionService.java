@@ -2,6 +2,7 @@ package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.WorkoutSessionDTO;
+import com.gymtracker.gymtracker.dto.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
@@ -21,8 +22,10 @@ public class WorkoutSessionService {
         this.workoutSessionRepository = workoutSessionRepository;
     }
 
-    public List<WorkoutSession> getAllWorkoutSessions() {
-        return workoutSessionRepository.findAll();
+    public List<WorkoutSessionResponse> getAllWorkoutSessions() {
+        return workoutSessionRepository.findAll().stream()
+                .map(WorkoutSessionResponse::from)
+                .collect(Collectors.toList());
     }
 
     public WorkoutSession getWorkoutSessionById(Long id) {
@@ -50,6 +53,8 @@ public class WorkoutSessionService {
     }
 
     public List<WorkoutSetResponse> getWorkoutSetsBySessionId(Long id) {
-        return null;
+        return getWorkoutSessionById(id).getWorkoutSets().stream()
+                .map(WorkoutSetResponse::from)
+                .collect(Collectors.toList());
     }
 }

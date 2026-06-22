@@ -2,6 +2,7 @@ package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.WorkoutSessionDTO;
+import com.gymtracker.gymtracker.dto.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
@@ -28,7 +29,7 @@ public class WorkoutSessionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WorkoutSession>> getAllWorkoutSessions() {
+    public ResponseEntity<List<WorkoutSessionResponse>> getAllWorkoutSessions() {
         return ResponseEntity.ok(workoutSessionService.getAllWorkoutSessions());
     }
 
