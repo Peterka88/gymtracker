@@ -1,8 +1,8 @@
 package com.gymtracker.gymtracker.service;
 
-import com.gymtracker.gymtracker.dto.WorkoutSetDTO;
-import com.gymtracker.gymtracker.dto.WorkoutSetPatchDTO;
-import com.gymtracker.gymtracker.dto.WorkoutSetResponse;
+import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetDTO;
+import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
+import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import org.springframework.http.HttpStatus;

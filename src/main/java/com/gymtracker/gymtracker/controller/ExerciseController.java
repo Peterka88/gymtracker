@@ -1,6 +1,6 @@
 package com.gymtracker.gymtracker.controller;
 
-import com.gymtracker.gymtracker.dto.ExerciseDTO;
+import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;

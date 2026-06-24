@@ -1,8 +1,8 @@
 package com.gymtracker.gymtracker.controller;
 
-import com.gymtracker.gymtracker.dto.WorkoutSetDTO;
-import com.gymtracker.gymtracker.dto.WorkoutSetPatchDTO;
-import com.gymtracker.gymtracker.dto.WorkoutSetResponse;
+import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetDTO;
+import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
+import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.service.WorkoutSetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

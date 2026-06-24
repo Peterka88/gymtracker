@@ -1,4 +1,4 @@
-package com.gymtracker.gymtracker.dto;
+package com.gymtracker.gymtracker.dto.personalRecord;
 
 import com.gymtracker.gymtracker.entity.PersonalRecord;
 import com.fasterxml.jackson.annotation.JsonFormat;

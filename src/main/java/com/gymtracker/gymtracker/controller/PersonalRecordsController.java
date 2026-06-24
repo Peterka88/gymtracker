@@ -1,6 +1,6 @@
 package com.gymtracker.gymtracker.controller;
 
-import com.gymtracker.gymtracker.dto.PersonalRecordResponse;
+import com.gymtracker.gymtracker.dto.personalRecord.PersonalRecordResponse;
 import com.gymtracker.gymtracker.service.PersonalRecordsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

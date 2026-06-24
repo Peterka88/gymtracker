@@ -1,4 +1,4 @@
-package com.gymtracker.gymtracker.dto;
+package com.gymtracker.gymtracker.dto.exercise;
 
 import com.gymtracker.gymtracker.entity.MuscleGroup;
 import jakarta.validation.constraints.NotBlank;

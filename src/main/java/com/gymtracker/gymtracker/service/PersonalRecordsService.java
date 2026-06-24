@@ -1,6 +1,6 @@
 package com.gymtracker.gymtracker.service;
 
-import com.gymtracker.gymtracker.dto.PersonalRecordResponse;
+import com.gymtracker.gymtracker.dto.personalRecord.PersonalRecordResponse;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.entity.PersonalRecord;
 import com.gymtracker.gymtracker.entity.WorkoutSet;

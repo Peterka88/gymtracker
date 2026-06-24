@@ -1,4 +1,4 @@
-package com.gymtracker.gymtracker.dto;
+package com.gymtracker.gymtracker.dto.workoutSet;
 
 import jakarta.validation.constraints.NotNull;
 

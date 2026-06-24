@@ -1,4 +1,6 @@
-package com.gymtracker.gymtracker.dto;
+package com.gymtracker.gymtracker.dto.workoutSession;
+
+import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 
 import java.time.LocalDate;
 import java.util.List;

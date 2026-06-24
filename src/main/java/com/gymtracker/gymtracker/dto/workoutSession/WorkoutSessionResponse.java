@@ -1,4 +1,4 @@
-package com.gymtracker.gymtracker.dto;
+package com.gymtracker.gymtracker.dto.workoutSession;
 
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 
