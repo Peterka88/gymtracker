@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public class WorkoutSessionDTO {
+public class WorkoutSessionRequestDTO {
+
+    private String name;
 
     @NotNull(message = "Date cannot be null")
     @JsonFormat(pattern = "dd.MM.yyyy")
@@ -17,15 +19,11 @@ public class WorkoutSessionDTO {
         return date;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
     public String getNote() {
         return note;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public String getName() {
+        return name;
     }
 }

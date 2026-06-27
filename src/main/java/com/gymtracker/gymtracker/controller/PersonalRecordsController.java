@@ -24,7 +24,7 @@ public class PersonalRecordsController {
         this.personalRecordsService = personalRecordsService;
     }
 
-    @Operation(summary = "Get all personal records", description = "Optionally filter by exercise using ?exerciseId=")
+    @Operation(summary = "Get all personal records for exercise", description = "Optionally filter by exercise using ?exerciseId=")
     @ApiResponse(responseCode = "200", description = "List of personal records")
     @GetMapping
     public ResponseEntity<List<PersonalRecordResponse>> getAllPersonalRecords(

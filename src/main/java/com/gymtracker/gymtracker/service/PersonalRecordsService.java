@@ -1,7 +1,6 @@
 package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.personalRecord.PersonalRecordResponse;
-import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.entity.PersonalRecord;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.PersonalRecordsRepository;
@@ -11,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,21 +37,22 @@ public class PersonalRecordsService {
     }
 
     public List<PersonalRecordResponse> getPersonalRecordsByExercise(Long exerciseId) {
-        return personalRecordsRepository.findByExerciseId(exerciseId)
-                .map(pr -> List.of(PersonalRecordResponse.from(pr)))
-                .orElse(List.of());
+        return personalRecordsRepository.findByExerciseIdOrderByAchievedAtDesc(exerciseId).stream()
+                .map(PersonalRecordResponse::from)
+                .collect(Collectors.toList());
     }
 
-    // Called automatically after each WorkoutSet save
+    // Called automatically after each WorkoutSet save — always inserts a new PR row if it's a new best
     public boolean checkAndUpdate(WorkoutSet set) {
         if (set.getWeight() == null) return false;
 
-        Exercise exercise = set.getExercise();
-        Optional<PersonalRecord> existing = personalRecordsRepository.findByExerciseId(exercise.getId());
+        Optional<PersonalRecord> currentBest = personalRecordsRepository
+                .findTopByExerciseIdOrderByWeightDesc(set.getExercise().getId());
 
-        if (existing.isEmpty() || set.getWeight() > existing.get().getWeight()) {
-            PersonalRecord pr = existing.orElseGet(PersonalRecord::new);
-            pr.setExercise(exercise);
+        if (currentBest.isEmpty() || set.getWeight() > currentBest.get().getWeight()) {
+            PersonalRecord pr = new PersonalRecord();
+            pr.setExercise(set.getExercise());
+            pr.setWorkoutSet(set);
             pr.setWeight(set.getWeight());
             pr.setReps(set.getReps());
             pr.setAchievedAt(LocalDate.now());
@@ -61,11 +62,12 @@ public class PersonalRecordsService {
         return false;
     }
 
-    public java.util.Map<Long, Double> getPrWeightByExercise() {
+    public Map<Long, Double> getPrWeightByExercise() {
         return personalRecordsRepository.findAll().stream()
-                .collect(java.util.stream.Collectors.toMap(
+                .collect(Collectors.toMap(
                         pr -> pr.getExercise().getId(),
-                        PersonalRecord::getWeight
+                        PersonalRecord::getWeight,
+                        Math::max
                 ));
     }
 

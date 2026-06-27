@@ -1,7 +1,7 @@
 package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDTO;
+import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionRequestDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
@@ -41,8 +41,9 @@ public class WorkoutSessionService {
         return new WorkoutSessionDetailResponse(session.getId(), session.getDate(), session.getNote(), sets);
     }
 
-    public WorkoutSessionResponse saveWorkoutSession(WorkoutSessionDTO dto) {
+    public WorkoutSessionResponse createWorkoutSession(WorkoutSessionRequestDTO dto) {
         WorkoutSession session = new WorkoutSession();
+        session.setName(dto.getName() == null ? dto.getDate().toString() : dto.getName());
         session.setDate(dto.getDate());
         session.setNote(dto.getNote());
         return WorkoutSessionResponse.from(workoutSessionRepository.save(session));

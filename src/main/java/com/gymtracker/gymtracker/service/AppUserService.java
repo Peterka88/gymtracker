@@ -16,7 +16,7 @@ public class AppUserService {
     }
 
     public AppUserResponseDTO createUser(AppUserRequestDTO dto) {
-        if (isUsernameTaken(dto.getUsername())) {
+        if (isUsernameTaken(dto.username())) {
             throw new IllegalArgumentException("Username is already taken");
         }
         return AppUserResponseDTO.from(appUserRepository.save(dto.toEntity()));

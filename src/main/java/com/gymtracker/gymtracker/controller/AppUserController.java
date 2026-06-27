@@ -6,7 +6,9 @@ import com.gymtracker.gymtracker.service.AppUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +26,7 @@ public class AppUserController {
     @Operation(summary = "Create a new user", description = "Registers a new user with the provided details")
     @ApiResponse(responseCode = "200", description = "User created successfully")
     @PostMapping
-    public AppUserResponseDTO createUser(AppUserRequestDTO dto) {
+    public AppUserResponseDTO createUser(@RequestBody @Valid AppUserRequestDTO dto) {
         return appUserService.createUser(dto);
     }
 

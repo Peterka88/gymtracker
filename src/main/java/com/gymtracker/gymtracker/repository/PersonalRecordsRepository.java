@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PersonalRecordsRepository extends JpaRepository<PersonalRecord, Long> {
-    Optional<PersonalRecord> findByExerciseId(Long exerciseId);
     List<PersonalRecord> findAllByOrderByAchievedAtDesc();
+    List<PersonalRecord> findByExerciseIdOrderByAchievedAtDesc(Long exerciseId);
+    Optional<PersonalRecord> findTopByExerciseIdOrderByWeightDesc(Long exerciseId);
 }
