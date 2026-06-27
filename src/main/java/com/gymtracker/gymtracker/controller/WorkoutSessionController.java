@@ -39,15 +39,19 @@ public class WorkoutSessionController {
                             }"""
             )))
     @PostMapping
-    public ResponseEntity<WorkoutSessionResponse> createWorkoutSession(@RequestBody @Valid WorkoutSessionRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(workoutSessionService.createWorkoutSession(dto));
+    public ResponseEntity<WorkoutSessionResponse> createWorkoutSession(
+            @RequestParam Long userId,
+            @RequestBody @Valid WorkoutSessionRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(workoutSessionService.createWorkoutSession(userId,dto));
     }
 
     @Operation(summary = "Get all workout sessions")
     @ApiResponse(responseCode = "200", description = "List of all sessions")
     @GetMapping
-    public ResponseEntity<List<WorkoutSessionResponse>> getAllWorkoutSessions() {
-        return ResponseEntity.ok(workoutSessionService.getAllWorkoutSessions());
+    public ResponseEntity<List<WorkoutSessionResponse>> getAllWorkoutSessions(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(workoutSessionService.getAllWorkoutSessions(userId));
     }
 
     @Operation(summary = "Get workout session detail with all sets")
@@ -64,8 +68,9 @@ public class WorkoutSessionController {
             )))
     @GetMapping("/{id}")
     public ResponseEntity<WorkoutSessionDetailResponse> getWorkoutSessionById(
+            @PathVariable Long userId,
             @Parameter(description = "Session ID") @PathVariable Long id) {
-        return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(id));
+        return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(userId, id));
     }
 
     @Operation(summary = "Get all workout sets for a session")
@@ -82,8 +87,9 @@ public class WorkoutSessionController {
             )))
     @GetMapping("/{id}/workout-sets")
     public ResponseEntity<List<WorkoutSetResponse>> getWorkoutSetsBySessionId(
+            @PathVariable Long userId,
             @Parameter(description = "Session ID") @PathVariable Long id) {
-        return ResponseEntity.ok(workoutSessionService.getWorkoutSetsBySessionId(id));
+        return ResponseEntity.ok(workoutSessionService.getWorkoutSetsBySessionId(userId ,id));
     }
 
     @Operation(summary = "Delete a workout session and all its sets")
@@ -100,8 +106,9 @@ public class WorkoutSessionController {
             )))
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSession(
+            @PathVariable Long userId,
             @Parameter(description = "Session ID") @PathVariable Long id) {
-        workoutSessionService.deleteWorkoutSession(id);
+        workoutSessionService.deleteWorkoutSession(userId, id);
         return ResponseEntity.noContent().build();
     }
 }

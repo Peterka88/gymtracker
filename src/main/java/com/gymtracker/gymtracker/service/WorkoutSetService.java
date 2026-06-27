@@ -3,6 +3,7 @@ package com.gymtracker.gymtracker.service;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
+import com.gymtracker.gymtracker.entity.AppUser;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import org.springframework.http.HttpStatus;
@@ -19,25 +20,32 @@ public class WorkoutSetService {
     private final ExerciseService exerciseService;
     private final WorkoutSessionService workoutSessionService;
     private final PersonalRecordsService personalRecordsService;
+    private final AppUserService appUserService;
 
     public WorkoutSetService(WorkoutSetRepository workoutSetRepository,
                              ExerciseService exerciseService,
                              WorkoutSessionService workoutSessionService,
-                             PersonalRecordsService personalRecordsService) {
+                             PersonalRecordsService personalRecordsService,
+                             AppUserService appUserService) {
         this.workoutSetRepository = workoutSetRepository;
         this.exerciseService = exerciseService;
         this.workoutSessionService = workoutSessionService;
         this.personalRecordsService = personalRecordsService;
+        this.appUserService = appUserService;
     }
 
-    public WorkoutSetResponse createWorkoutSet(WorkoutSetDTO dto) {
-        WorkoutSet saved = workoutSetRepository.save(mapDtoToSet(new WorkoutSet(), dto));
-        boolean isPR = personalRecordsService.checkAndUpdate(saved);
+    public WorkoutSetResponse createWorkoutSet(Long userId, WorkoutSetDTO dto) {
+        AppUser user = appUserService.getAppUserById(userId);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        WorkoutSet saved = workoutSetRepository.save(mapDtoToSet(userId, new WorkoutSet(), dto));
+        boolean isPR = personalRecordsService.checkAndUpdate(saved, user);
         return WorkoutSetResponse.from(saved, isPR);
     }
 
-    public List<WorkoutSetResponse> getAllWorkoutSets() {
-        var prWeights = personalRecordsService.getPrWeightByExercise();
+    public List<WorkoutSetResponse> getAllWorkoutSets(Long userId) {
+        var prWeights = personalRecordsService.getPrWeightByExercise(userId);
         return workoutSetRepository.findAll().stream()
                 .map(set -> WorkoutSetResponse.from(set, prWeights))
                 .collect(Collectors.toList());
@@ -48,13 +56,13 @@ public class WorkoutSetService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found")));
     }
 
-    public WorkoutSetResponse partialUpdateWorkoutSet(Long id, WorkoutSetPatchDTO dto) {
+    public WorkoutSetResponse partialUpdateWorkoutSet(Long userId, Long id, WorkoutSetPatchDTO dto) {
         WorkoutSet set = workoutSetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found"));
         if (dto.getExerciseId() != null)
             set.setExercise(exerciseService.getExerciseById(dto.getExerciseId()));
         if (dto.getWorkoutSessionId() != null)
-            set.setSession(workoutSessionService.getWorkoutSessionById(dto.getWorkoutSessionId()));
+            set.setSession(workoutSessionService.getWorkoutSessionById(userId, dto.getWorkoutSessionId()));
         if (dto.getWeight() != null)
             set.setWeight(dto.getWeight());
         if (dto.getReps() != null)
@@ -68,13 +76,12 @@ public class WorkoutSetService {
         workoutSetRepository.deleteById(id);
     }
 
-    private WorkoutSet mapDtoToSet(WorkoutSet set, WorkoutSetDTO dto) {
+    private WorkoutSet mapDtoToSet(Long userId, WorkoutSet set, WorkoutSetDTO dto) {
         set.setExercise(exerciseService.getExerciseById(dto.getExerciseId()));
-        set.setSession(workoutSessionService.getWorkoutSessionById(dto.getSessionId()));
+        set.setSession(workoutSessionService.getWorkoutSessionById(userId, dto.getSessionId()));
         set.setWeight(dto.getWeight());
         set.setReps(dto.getReps());
         set.setNote(dto.getNote());
         return set;
     }
-
 }

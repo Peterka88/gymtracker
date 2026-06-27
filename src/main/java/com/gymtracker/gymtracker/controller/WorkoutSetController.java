@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// TODO: replace @RequestParam Long userId with @AuthenticationPrincipal once JWT is implemented
 @Tag(name = "Workout Sets", description = "Manage individual sets within a workout session")
 @RestController
 @RequestMapping("/api/workout-sets")
@@ -49,15 +50,18 @@ public class WorkoutSetController {
                             }"""
             )))
     @PostMapping
-    public ResponseEntity<WorkoutSetResponse> createWorkoutSet(@RequestBody @Valid WorkoutSetDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(workoutSetService.createWorkoutSet(dto));
+    public ResponseEntity<WorkoutSetResponse> createWorkoutSet(
+            @Parameter(description = "User ID") @RequestParam Long userId,
+            @RequestBody @Valid WorkoutSetDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(workoutSetService.createWorkoutSet(userId, dto));
     }
 
     @Operation(summary = "Get all workout sets")
     @ApiResponse(responseCode = "200", description = "List of all workout sets")
     @GetMapping
-    public ResponseEntity<List<WorkoutSetResponse>> getAllWorkoutSets() {
-        return ResponseEntity.ok(workoutSetService.getAllWorkoutSets());
+    public ResponseEntity<List<WorkoutSetResponse>> getAllWorkoutSets(
+            @Parameter(description = "User ID") @RequestParam Long userId) {
+        return ResponseEntity.ok(workoutSetService.getAllWorkoutSets(userId));
     }
 
     @Operation(summary = "Get a workout set by ID")
@@ -92,9 +96,10 @@ public class WorkoutSetController {
             )))
     @PatchMapping("/{id}")
     public ResponseEntity<WorkoutSetResponse> partialUpdateWorkoutSet(
+            @PathVariable Long userId,
             @Parameter(description = "Workout set ID") @PathVariable Long id,
             @RequestBody WorkoutSetPatchDTO dto) {
-        return ResponseEntity.ok(workoutSetService.partialUpdateWorkoutSet(id, dto));
+        return ResponseEntity.ok(workoutSetService.partialUpdateWorkoutSet(userId, id, dto));
     }
 
     @Operation(summary = "Delete a workout set by ID")
@@ -103,7 +108,6 @@ public class WorkoutSetController {
             content = @Content(mediaType = "application/json", examples = @ExampleObject(
                     value = """
                             {
-
                               "title": "Not Found",
                               "status": 404,
                               "detail": "Workout set not found",

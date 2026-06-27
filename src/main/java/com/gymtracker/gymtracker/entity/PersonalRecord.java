@@ -2,7 +2,7 @@ package com.gymtracker.gymtracker.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "personal_records")
@@ -20,11 +20,15 @@ public class PersonalRecord {
     @JoinColumn(name = "workoutSetId")
     private WorkoutSet workoutSet;
 
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private AppUser appUser;
+
     private Double weight;
 
     private Integer reps;
 
-    private LocalDate achievedAt;
+    private LocalDateTime achievedAt;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -32,10 +36,12 @@ public class PersonalRecord {
     public void setExercise(Exercise exercise) { this.exercise = exercise; }
     public WorkoutSet getWorkoutSet() { return workoutSet; }
     public void setWorkoutSet(WorkoutSet workoutSet) { this.workoutSet = workoutSet; }
+    public AppUser getAppUser() { return appUser; }
+    public void setAppUser(AppUser appUser) { this.appUser = appUser; }
     public Double getWeight() { return weight; }
     public void setWeight(Double weight) { this.weight = weight; }
     public Integer getReps() { return reps; }
     public void setReps(Integer reps) { this.reps = reps; }
-    public LocalDate getAchievedAt() { return achievedAt; }
-    public void setAchievedAt(LocalDate achievedAt) { this.achievedAt = achievedAt; }
+    public LocalDateTime getAchievedAt() { return achievedAt; }
+    public void setAchievedAt(LocalDateTime achievedAt) { this.achievedAt = achievedAt; }
 }

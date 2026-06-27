@@ -25,6 +25,10 @@ public class WorkoutSession {
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkoutSet> workoutSets = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private AppUser appUser;
+
     public Long getId() {
         return id;
     }
@@ -63,5 +67,13 @@ public class WorkoutSession {
 
     public void setWorkoutSets(List<WorkoutSet> workoutSets) {
         this.workoutSets = workoutSets;
+    }
+
+    public AppUser getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
     }
 }

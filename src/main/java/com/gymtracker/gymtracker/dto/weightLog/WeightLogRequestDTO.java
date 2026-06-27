@@ -4,8 +4,6 @@ public class WeightLogRequestDTO {
 
     private Double weight;
 
-    public WeightLogRequestDTO() {}
-
     public Double getWeight() {
         return weight;
     }

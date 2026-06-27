@@ -17,44 +17,49 @@ import java.util.stream.Collectors;
 public class WorkoutSessionService {
 
     private final WorkoutSessionRepository workoutSessionRepository;
+    private final AppUserService appUserService;
 
-    public WorkoutSessionService(WorkoutSessionRepository workoutSessionRepository) {
+    public WorkoutSessionService(WorkoutSessionRepository workoutSessionRepository, AppUserService appUserService) {
         this.workoutSessionRepository = workoutSessionRepository;
+        this.appUserService = appUserService;
     }
 
-    public List<WorkoutSessionResponse> getAllWorkoutSessions() {
-        return workoutSessionRepository.findAll().stream()
+    public List<WorkoutSessionResponse> getAllWorkoutSessions(Long userId) {
+        return workoutSessionRepository.findAllByAppUserId(userId).stream()
                 .map(WorkoutSessionResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public WorkoutSession getWorkoutSessionById(Long id) {
-        return workoutSessionRepository.findById(id)
+    public WorkoutSession getWorkoutSessionById(Long userId, Long id) {
+        return workoutSessionRepository.findByAppUserIdAndId(userId, id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout session not found"));
     }
 
-    public WorkoutSessionDetailResponse getWorkoutSessionDetail(Long id) {
-        WorkoutSession session = getWorkoutSessionById(id);
+    public WorkoutSessionDetailResponse getWorkoutSessionDetail(Long userId, Long id) {
+        WorkoutSession session = getWorkoutSessionById(userId, id);
         List<WorkoutSetResponse> sets = session.getWorkoutSets().stream()
                 .map(WorkoutSetResponse::from)
                 .collect(Collectors.toList());
         return new WorkoutSessionDetailResponse(session.getId(), session.getDate(), session.getNote(), sets);
     }
 
-    public WorkoutSessionResponse createWorkoutSession(WorkoutSessionRequestDTO dto) {
+    public WorkoutSessionResponse createWorkoutSession(Long userId, WorkoutSessionRequestDTO dto) {
+        var appUser = appUserService.getAppUserById(userId);
+
         WorkoutSession session = new WorkoutSession();
         session.setName(dto.getName() == null ? dto.getDate().toString() : dto.getName());
         session.setDate(dto.getDate());
         session.setNote(dto.getNote());
+        session.setAppUser(appUser);
         return WorkoutSessionResponse.from(workoutSessionRepository.save(session));
     }
 
-    public void deleteWorkoutSession(Long id) {
-        workoutSessionRepository.deleteById(id);
+    public void deleteWorkoutSession(Long userId, Long id) {
+        workoutSessionRepository.deleteAllByAppUserIdAndId(userId, id);
     }
 
-    public List<WorkoutSetResponse> getWorkoutSetsBySessionId(Long id) {
-        return getWorkoutSessionById(id).getWorkoutSets().stream()
+    public List<WorkoutSetResponse> getWorkoutSetsBySessionId(Long userId, Long id) {
+        return getWorkoutSessionById(userId, id).getWorkoutSets().stream()
                 .map(WorkoutSetResponse::from)
                 .collect(Collectors.toList());
     }

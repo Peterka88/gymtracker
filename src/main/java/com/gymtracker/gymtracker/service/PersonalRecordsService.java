@@ -1,6 +1,7 @@
 package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.personalRecord.PersonalRecordResponse;
+import com.gymtracker.gymtracker.entity.AppUser;
 import com.gymtracker.gymtracker.entity.PersonalRecord;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.PersonalRecordsRepository;
@@ -8,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,8 +24,14 @@ public class PersonalRecordsService {
         this.personalRecordsRepository = personalRecordsRepository;
     }
 
-    public List<PersonalRecordResponse> getAllPersonalRecords() {
-        return personalRecordsRepository.findAllByOrderByAchievedAtDesc().stream()
+    public List<PersonalRecordResponse> getAllPersonalRecords(Long userId) {
+        return personalRecordsRepository.findByAppUserIdOrderByAchievedAtDesc(userId).stream()
+                .map(PersonalRecordResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    public List<PersonalRecordResponse> getBestPRsForUser(Long userId) {
+        return personalRecordsRepository.findBestPerExerciseForUser(userId).stream()
                 .map(PersonalRecordResponse::from)
                 .collect(Collectors.toList());
     }
@@ -36,34 +43,36 @@ public class PersonalRecordsService {
         );
     }
 
-    public List<PersonalRecordResponse> getPersonalRecordsByExercise(Long exerciseId) {
-        return personalRecordsRepository.findByExerciseIdOrderByAchievedAtDesc(exerciseId).stream()
+    public List<PersonalRecordResponse> getPersonalRecordsByExercise(Long exerciseId, Long userId) {
+        return personalRecordsRepository.findByExerciseIdAndAppUserIdOrderByAchievedAtDesc(exerciseId, userId).stream()
                 .map(PersonalRecordResponse::from)
                 .collect(Collectors.toList());
     }
 
     // Called automatically after each WorkoutSet save — always inserts a new PR row if it's a new best
-    public boolean checkAndUpdate(WorkoutSet set) {
+    public boolean checkAndUpdate(WorkoutSet set, AppUser user) {
         if (set.getWeight() == null) return false;
 
         Optional<PersonalRecord> currentBest = personalRecordsRepository
-                .findTopByExerciseIdOrderByWeightDesc(set.getExercise().getId());
+                .findTopByExerciseIdAndAppUserIdOrderByWeightDesc(set.getExercise().getId(), user.getId());
 
         if (currentBest.isEmpty() || set.getWeight() > currentBest.get().getWeight()) {
             PersonalRecord pr = new PersonalRecord();
             pr.setExercise(set.getExercise());
             pr.setWorkoutSet(set);
+            pr.setAppUser(user);
             pr.setWeight(set.getWeight());
             pr.setReps(set.getReps());
-            pr.setAchievedAt(LocalDate.now());
+            pr.setAchievedAt(LocalDateTime.now());
             personalRecordsRepository.save(pr);
             return true;
         }
         return false;
     }
 
-    public Map<Long, Double> getPrWeightByExercise() {
+    public Map<Long, Double> getPrWeightByExercise(Long userId) {
         return personalRecordsRepository.findAll().stream()
+                .filter(pr -> pr.getAppUser() != null && pr.getAppUser().getId().equals(userId))
                 .collect(Collectors.toMap(
                         pr -> pr.getExercise().getId(),
                         PersonalRecord::getWeight,

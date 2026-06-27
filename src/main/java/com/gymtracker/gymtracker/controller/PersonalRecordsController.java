@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// TODO: replace @RequestParam Long userId with @AuthenticationPrincipal once JWT is implemented
 @Tag(name = "Personal Records", description = "View best lifts per exercise, updated automatically")
 @RestController
 @RequestMapping("/api/personal-records")
@@ -24,15 +25,16 @@ public class PersonalRecordsController {
         this.personalRecordsService = personalRecordsService;
     }
 
-    @Operation(summary = "Get all personal records for exercise", description = "Optionally filter by exercise using ?exerciseId=")
+    @Operation(summary = "Get PR history for a user", description = "Full history ordered by date. Optionally filter by ?exerciseId=")
     @ApiResponse(responseCode = "200", description = "List of personal records")
     @GetMapping
     public ResponseEntity<List<PersonalRecordResponse>> getAllPersonalRecords(
+            @Parameter(description = "User ID") @RequestParam Long userId,
             @Parameter(description = "Filter by exercise ID") @RequestParam(required = false) Long exerciseId) {
         if (exerciseId != null) {
-            return ResponseEntity.ok(personalRecordsService.getPersonalRecordsByExercise(exerciseId));
+            return ResponseEntity.ok(personalRecordsService.getPersonalRecordsByExercise(exerciseId, userId));
         }
-        return ResponseEntity.ok(personalRecordsService.getAllPersonalRecords());
+        return ResponseEntity.ok(personalRecordsService.getBestPRsForUser(userId));
     }
 
     @Operation(summary = "Get a personal record by ID")
