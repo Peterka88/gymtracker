@@ -35,8 +35,7 @@ public class WorkoutSetController {
             content = @Content(mediaType = "application/json", examples = @ExampleObject(
                     value = """
                             {
-                              "exerciseId": "Exercise must be specified",
-                              "sessionId": "Workout session must be specified"
+                              "sessionExerciseId": "Session exercise must be specified"
                             }"""
             )))
     @ApiResponse(responseCode = "404", description = "Exercise or session not found",

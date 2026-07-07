@@ -14,8 +14,8 @@ public record WorkoutSetResponse(Long id, Long exerciseId, String exerciseName,
     public static WorkoutSetResponse from(WorkoutSet set, boolean isPR) {
         return new WorkoutSetResponse(
                 set.getId(),
-                set.getExercise().getId(),
-                set.getExercise().getName(),
+                set.getSessionExercise().getExercise().getId(),
+                set.getSessionExercise().getExercise().getName(),
                 set.getWeight(),
                 set.getReps(),
                 set.getNote(),
@@ -23,7 +23,7 @@ public record WorkoutSetResponse(Long id, Long exerciseId, String exerciseName,
     }
 
     public static WorkoutSetResponse from(WorkoutSet set, Map<Long, Double> prWeights) {
-        Double prWeight = prWeights.get(set.getExercise().getId());
+        Double prWeight = prWeights.get(set.getSessionExercise().getExercise().getId());
         boolean isPR = set.getWeight() != null && set.getWeight().equals(prWeight);
         return from(set, isPR);
     }

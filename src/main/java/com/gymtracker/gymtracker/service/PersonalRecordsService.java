@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,11 +55,11 @@ public class PersonalRecordsService {
         if (set.getWeight() == null) return false;
 
         Optional<PersonalRecord> currentBest = personalRecordsRepository
-                .findTopByExerciseIdAndAppUserIdOrderByWeightDesc(set.getExercise().getId(), user.getId());
+                .findTopByExerciseIdAndAppUserIdOrderByWeightDesc(set.getSessionExercise().getExercise().getId(), user.getId());
 
         if (currentBest.isEmpty() || set.getWeight() > currentBest.get().getWeight()) {
             PersonalRecord pr = new PersonalRecord();
-            pr.setExercise(set.getExercise());
+            pr.setExercise(set.getSessionExercise().getExercise());
             pr.setWorkoutSet(set);
             pr.setAppUser(user);
             pr.setWeight(set.getWeight());
@@ -82,5 +83,9 @@ public class PersonalRecordsService {
 
     public void deletePersonalRecord(Long id) {
         personalRecordsRepository.deleteById(id);
+    }
+
+    public Set<Long> getSessionIdsWithPr(Long userId) {
+        return Set.copyOf(personalRecordsRepository.findSessionIdsWithPrForUser(userId));
     }
 }

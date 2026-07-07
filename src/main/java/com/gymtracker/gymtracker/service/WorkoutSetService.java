@@ -17,19 +17,16 @@ import java.util.stream.Collectors;
 public class WorkoutSetService {
 
     private final WorkoutSetRepository workoutSetRepository;
-    private final ExerciseService exerciseService;
-    private final WorkoutSessionService workoutSessionService;
+    private final SessionExerciseService sessionExerciseService;
     private final PersonalRecordsService personalRecordsService;
     private final AppUserService appUserService;
 
     public WorkoutSetService(WorkoutSetRepository workoutSetRepository,
-                             ExerciseService exerciseService,
-                             WorkoutSessionService workoutSessionService,
+                             SessionExerciseService sessionExerciseService,
                              PersonalRecordsService personalRecordsService,
                              AppUserService appUserService) {
         this.workoutSetRepository = workoutSetRepository;
-        this.exerciseService = exerciseService;
-        this.workoutSessionService = workoutSessionService;
+        this.sessionExerciseService = sessionExerciseService;
         this.personalRecordsService = personalRecordsService;
         this.appUserService = appUserService;
     }
@@ -59,10 +56,8 @@ public class WorkoutSetService {
     public WorkoutSetResponse partialUpdateWorkoutSet(Long userId, Long id, WorkoutSetPatchDTO dto) {
         WorkoutSet set = workoutSetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found"));
-        if (dto.getExerciseId() != null)
-            set.setExercise(exerciseService.getExerciseById(dto.getExerciseId()));
-        if (dto.getWorkoutSessionId() != null)
-            set.setSession(workoutSessionService.getWorkoutSessionById(userId, dto.getWorkoutSessionId()));
+        if (dto.getSessionExerciseId() != null)
+            set.setSessionExercise(sessionExerciseService.getSessionExerciseById(userId, dto.getSessionExerciseId()));
         if (dto.getWeight() != null)
             set.setWeight(dto.getWeight());
         if (dto.getReps() != null)
@@ -77,8 +72,7 @@ public class WorkoutSetService {
     }
 
     private WorkoutSet mapDtoToSet(Long userId, WorkoutSet set, WorkoutSetDTO dto) {
-        set.setExercise(exerciseService.getExerciseById(dto.getExerciseId()));
-        set.setSession(workoutSessionService.getWorkoutSessionById(userId, dto.getSessionId()));
+        set.setSessionExercise(sessionExerciseService.getSessionExerciseById(userId, dto.getSessionExerciseId()));
         set.setWeight(dto.getWeight());
         set.setReps(dto.getReps());
         set.setNote(dto.getNote());

@@ -16,4 +16,8 @@ public interface PersonalRecordsRepository extends JpaRepository<PersonalRecord,
     @Query("SELECT pr FROM PersonalRecord pr WHERE pr.appUser.id = :userId AND pr.weight = " +
            "(SELECT MAX(pr2.weight) FROM PersonalRecord pr2 WHERE pr2.exercise = pr.exercise AND pr2.appUser.id = :userId)")
     List<PersonalRecord> findBestPerExerciseForUser(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT pr.workoutSet.sessionExercise.session.id FROM PersonalRecord pr " +
+           "WHERE pr.appUser.id = :userId AND pr.workoutSet IS NOT NULL")
+    List<Long> findSessionIdsWithPrForUser(@Param("userId") Long userId);
 }

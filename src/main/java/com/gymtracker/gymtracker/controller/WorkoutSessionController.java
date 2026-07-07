@@ -47,11 +47,13 @@ public class WorkoutSessionController {
 
     @Operation(summary = "Get all workout sessions")
     @ApiResponse(responseCode = "200", description = "List of all sessions")
-    @GetMapping
-    public ResponseEntity<List<WorkoutSessionResponse>> getAllWorkoutSessions(
-            @PathVariable Long userId
+    @GetMapping()
+    public ResponseEntity<List<WorkoutSessionResponse>> getWorkoutSessions(
+            @RequestParam Long userId,
+            @Parameter(description = "Page size, defaults to 10 when omitted") @RequestParam(required = false) Integer size,
+            @Parameter(description = "Page number, defaults to 0") @RequestParam(required = false) Integer page
     ) {
-        return ResponseEntity.ok(workoutSessionService.getAllWorkoutSessions(userId));
+        return ResponseEntity.ok(workoutSessionService.getWorkoutSessions(userId, size, page));
     }
 
     @Operation(summary = "Get workout session detail with all sets")
@@ -66,7 +68,7 @@ public class WorkoutSessionController {
                               "instance": "/api/workout-sessions/99"
                             }"""
             )))
-    @GetMapping("/{id}")
+    @GetMapping("/{userId}/{id}")
     public ResponseEntity<WorkoutSessionDetailResponse> getWorkoutSessionById(
             @PathVariable Long userId,
             @Parameter(description = "Session ID") @PathVariable Long id) {

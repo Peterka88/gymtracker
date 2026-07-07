@@ -23,7 +23,7 @@ public class WorkoutSession {
     private String note;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WorkoutSet> workoutSets = new ArrayList<>();
+    private List<SessionExercise> sessionExercises = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "userId")
@@ -61,12 +61,12 @@ public class WorkoutSession {
         this.note = notes;
     }
 
-    public List<WorkoutSet> getWorkoutSets() {
-        return workoutSets;
+    public List<SessionExercise> getSessionExercises() {
+        return sessionExercises;
     }
 
-    public void setWorkoutSets(List<WorkoutSet> workoutSets) {
-        this.workoutSets = workoutSets;
+    public void setSessionExercises(List<SessionExercise> sessionExercises) {
+        this.sessionExercises = sessionExercises;
     }
 
     public AppUser getAppUser() {

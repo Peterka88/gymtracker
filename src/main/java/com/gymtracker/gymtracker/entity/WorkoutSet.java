@@ -11,12 +11,8 @@ public class WorkoutSet {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "exerciseId", nullable = false)
-    private Exercise exercise;
-
-    @ManyToOne
-    @JoinColumn(name = "sessionId")
-    private WorkoutSession session;
+    @JoinColumn(name = "sessionExerciseId", nullable = false)
+    private SessionExercise sessionExercise;
 
     private Double weight;
 
@@ -32,20 +28,12 @@ public class WorkoutSet {
         this.id = id;
     }
 
-    public Exercise getExercise() {
-        return exercise;
+    public SessionExercise getSessionExercise() {
+        return sessionExercise;
     }
 
-    public void setExercise(Exercise exercise) {
-        this.exercise = exercise;
-    }
-
-    public WorkoutSession getSession() {
-        return session;
-    }
-
-    public void setSession(WorkoutSession session) {
-        this.session = session;
+    public void setSessionExercise(SessionExercise sessionExercise) {
+        this.sessionExercise = sessionExercise;
     }
 
     public Double getWeight() {

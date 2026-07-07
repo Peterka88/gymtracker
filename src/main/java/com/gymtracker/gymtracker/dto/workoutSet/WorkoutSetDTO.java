@@ -4,11 +4,8 @@ import jakarta.validation.constraints.NotNull;
 
 public class WorkoutSetDTO {
 
-    @NotNull(message = "Exercise must be specified")
-    private Long exerciseId;
-
-    @NotNull(message = "Workout session must be specified")
-    private Long sessionId;
+    @NotNull(message = "Session exercise must be specified")
+    private Long sessionExerciseId;
 
     private Double weight;
 
@@ -16,20 +13,12 @@ public class WorkoutSetDTO {
 
     private String note;
 
-    public Long getExerciseId() {
-        return exerciseId;
+    public Long getSessionExerciseId() {
+        return sessionExerciseId;
     }
 
-    public void setExerciseId(Long exerciseId) {
-        this.exerciseId = exerciseId;
-    }
-
-    public Long getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(Long sessionId) {
-        this.sessionId = sessionId;
+    public void setSessionExerciseId(Long sessionExerciseId) {
+        this.sessionExerciseId = sessionExerciseId;
     }
 
     public Double getWeight() {
