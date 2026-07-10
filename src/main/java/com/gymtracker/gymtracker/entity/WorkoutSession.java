@@ -2,7 +2,7 @@ package com.gymtracker.gymtracker.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,9 @@ public class WorkoutSession {
     private String name;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDateTime startedAt;
+
+    private Integer durationMinutes;
 
     private String note;
 
@@ -45,12 +47,20 @@ public class WorkoutSession {
         this.name = name;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDateTime getStartedAt() {
+        return startedAt;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
     }
 
     public String getNote() {

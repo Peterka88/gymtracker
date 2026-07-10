@@ -55,14 +55,6 @@ public class WorkoutSetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutSetService.createWorkoutSet(userId, dto));
     }
 
-    @Operation(summary = "Get all workout sets")
-    @ApiResponse(responseCode = "200", description = "List of all workout sets")
-    @GetMapping
-    public ResponseEntity<List<WorkoutSetResponse>> getAllWorkoutSets(
-            @Parameter(description = "User ID") @RequestParam Long userId) {
-        return ResponseEntity.ok(workoutSetService.getAllWorkoutSets(userId));
-    }
-
     @Operation(summary = "Get a workout set by ID")
     @ApiResponse(responseCode = "200", description = "Workout set found")
     @ApiResponse(responseCode = "404", description = "Workout set not found",

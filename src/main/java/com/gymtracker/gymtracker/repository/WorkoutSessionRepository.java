@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, Long> {
-    List<WorkoutSession> findAllByAppUserIdOrderByDateDesc(Long userId, Pageable pageable);
+    List<WorkoutSession> findAllByAppUserIdOrderByStartedAtDesc(Long userId, Pageable pageable);
 
     Optional<WorkoutSession> findByAppUserIdAndId(Long appUserId, Long id);
 

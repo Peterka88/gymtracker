@@ -1,10 +1,12 @@
 package com.gymtracker.gymtracker.service;
 
+import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseDTO;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionRequestDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
+import com.gymtracker.gymtracker.entity.SessionExercise;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
@@ -14,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,15 +30,17 @@ public class WorkoutSessionService {
     private final SessionExerciseRepository sessionExerciseRepository;
     private final AppUserService appUserService;
     private final PersonalRecordsService personalRecordsService;
-
+    private final ExerciseService exerciseService;
     public WorkoutSessionService(WorkoutSessionRepository workoutSessionRepository,
                                   SessionExerciseRepository sessionExerciseRepository,
                                   AppUserService appUserService,
-                                  PersonalRecordsService personalRecordsService) {
+                                  PersonalRecordsService personalRecordsService,
+                                  ExerciseService exerciseService) {
         this.workoutSessionRepository = workoutSessionRepository;
         this.sessionExerciseRepository = sessionExerciseRepository;
         this.appUserService = appUserService;
         this.personalRecordsService = personalRecordsService;
+        this.exerciseService = exerciseService;
     }
 
     public List<WorkoutSessionResponse> getWorkoutSessions(Long userId, Integer paramSize, Integer page) {
@@ -45,10 +48,9 @@ public class WorkoutSessionService {
         Pageable pageable = PageRequest.of(page == null ? 0 : page, size);
         Set<Long> sessionIdsWithPr = personalRecordsService.getSessionIdsWithPr(userId);
 
-        List<WorkoutSession> sessions = workoutSessionRepository.findAllByAppUserIdOrderByDateDesc(userId, pageable);
+        List<WorkoutSession> sessions = workoutSessionRepository.findAllByAppUserIdOrderByStartedAtDesc(userId, pageable);
         List<Long> sessionIds = sessions.stream().map(WorkoutSession::getId).collect(Collectors.toList());
-        Map<Long, Integer> exerciseCounts = sessionIds.isEmpty() ? Map.of() : sessionExerciseRepository.countBySessionIds(sessionIds).stream()
-                .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
+        Map<Long, Integer> exerciseCounts = countExercisesBySessionIds(sessionIds);
 
         return sessions.stream()
                 .map(session -> WorkoutSessionResponse.from(
@@ -65,19 +67,29 @@ public class WorkoutSessionService {
 
     public WorkoutSessionDetailResponse getWorkoutSessionDetail(Long userId, Long id) {
         WorkoutSession session = getWorkoutSessionById(userId, id);
-        List<SessionExerciseResponse> exercises = session.getSessionExercises().stream()
-                .sorted(Comparator.comparing(se -> se.getOrderIndex() == null ? Integer.MAX_VALUE : se.getOrderIndex()))
-                .map(SessionExerciseResponse::from)
-                .collect(Collectors.toList());
-        return new WorkoutSessionDetailResponse(session.getId(), session.getDate(), session.getNote(), exercises);
+        List<SessionExercise> sessionExerciseList = sessionExerciseRepository.findAllBySessionIdWithSetsOrderByOrderIndexAsc(id);
+        Set<Long> prWorkoutSetIds = personalRecordsService.getPrWorkoutSetIds(userId, id);
+
+        return new WorkoutSessionDetailResponse(
+                session.getId(),
+                session.getName(),
+                session.getStartedAt(),
+                session.getDurationMinutes(),
+                session.getNote(),
+                !prWorkoutSetIds.isEmpty(),
+                sessionExerciseList.stream()
+                        .map(se -> SessionExerciseResponse.from(se, prWorkoutSetIds))
+                        .collect(Collectors.toList())
+        );
     }
 
     public WorkoutSessionResponse createWorkoutSession(Long userId, WorkoutSessionRequestDTO dto) {
         var appUser = appUserService.getAppUserById(userId);
 
         WorkoutSession session = new WorkoutSession();
-        session.setName(dto.getName() == null ? dto.getDate().toString() : dto.getName());
-        session.setDate(dto.getDate());
+        session.setName(dto.getName() == null ? dto.getStartedAt().toString() : dto.getName());
+        session.setStartedAt(dto.getStartedAt());
+        session.setDurationMinutes(dto.getDurationMinutes());
         session.setNote(dto.getNote());
         session.setAppUser(appUser);
         return WorkoutSessionResponse.from(workoutSessionRepository.save(session));
@@ -88,9 +100,40 @@ public class WorkoutSessionService {
     }
 
     public List<WorkoutSetResponse> getWorkoutSetsBySessionId(Long userId, Long id) {
+        Set<Long> prWorkoutSetIds = personalRecordsService.getPrWorkoutSetIds(userId, id);
         return getWorkoutSessionById(userId, id).getSessionExercises().stream()
                 .flatMap(sessionExercise -> sessionExercise.getWorkoutSets().stream())
-                .map(WorkoutSetResponse::from)
+                .map(set -> WorkoutSetResponse.from(set, prWorkoutSetIds))
                 .collect(Collectors.toList());
+    }
+
+    public SessionExerciseResponse createSessionExercise(Long userId, Long sessionId, SessionExerciseDTO dto) {
+        WorkoutSession session = getWorkoutSessionById(userId, sessionId);
+
+        SessionExercise sessionExercise = new SessionExercise();
+        sessionExercise.setSession(session);
+        sessionExercise.setExercise(exerciseService.getExerciseById(dto.getExerciseId()));
+        sessionExercise.setOrderIndex(dto.getOrderIndex());
+        return SessionExerciseResponse.from(sessionExerciseRepository.save(sessionExercise));
+    }
+
+    public List<SessionExerciseResponse> getSessionExercises(Long userId, Long sessionId) {
+        Set<Long> prWorkoutSetIds = personalRecordsService.getPrWorkoutSetIds(userId, sessionId);
+        return sessionExerciseRepository.findAllBySessionIdWithSetsOrderByOrderIndexAsc(sessionId).stream()
+                .map(se -> SessionExerciseResponse.from(se, prWorkoutSetIds))
+                .collect(Collectors.toList());
+    }
+
+    public SessionExercise getSessionExerciseById(Long userId, Long id) {
+        return sessionExerciseRepository.findByIdAndSessionAppUserId(id, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session exercise not found"));
+    }
+
+    private Map<Long, Integer> countExercisesBySessionIds(List<Long> sessionIds) {
+        if (sessionIds.isEmpty()) {
+            return Map.of();
+        }
+        return sessionExerciseRepository.countBySessionIds(sessionIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
     }
 }

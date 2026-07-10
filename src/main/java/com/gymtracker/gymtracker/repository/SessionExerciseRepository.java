@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SessionExerciseRepository extends JpaRepository<SessionExercise, Long> {
-    List<SessionExercise> findAllBySessionIdOrderByOrderIndexAsc(Long sessionId);
+    @Query("SELECT DISTINCT se FROM SessionExercise se LEFT JOIN FETCH se.workoutSets " +
+           "WHERE se.session.id = :sessionId ORDER BY se.orderIndex ASC")
+    List<SessionExercise> findAllBySessionIdWithSetsOrderByOrderIndexAsc(@Param("sessionId") Long sessionId);
 
     Optional<SessionExercise> findByIdAndSessionAppUserId(Long id, Long appUserId);
 

@@ -18,6 +18,10 @@ public interface PersonalRecordsRepository extends JpaRepository<PersonalRecord,
     List<PersonalRecord> findBestPerExerciseForUser(@Param("userId") Long userId);
 
     @Query("SELECT DISTINCT pr.workoutSet.sessionExercise.session.id FROM PersonalRecord pr " +
-           "WHERE pr.appUser.id = :userId AND pr.workoutSet IS NOT NULL")
+           "WHERE pr.appUser.id = :userId")
     List<Long> findSessionIdsWithPrForUser(@Param("userId") Long userId);
+
+    @Query("SELECT pr.workoutSet.id FROM PersonalRecord pr " +
+            "WHERE pr.appUser.id = :userId AND pr.workoutSet.sessionExercise.session.id = :workoutSessionId")
+    List<Long> findWorkoutSetIdsByAppUserIdAndSessionId(@Param("userId") Long userId, @Param("workoutSessionId") Long workoutSessionId);
 }

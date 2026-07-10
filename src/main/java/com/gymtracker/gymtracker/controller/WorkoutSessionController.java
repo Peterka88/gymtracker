@@ -35,7 +35,7 @@ public class WorkoutSessionController {
             content = @Content(mediaType = "application/json", examples = @ExampleObject(
                     value = """
                             {
-                              "date": "Date cannot be null"
+                              "startedAt": "Start time cannot be null"
                             }"""
             )))
     @PostMapping

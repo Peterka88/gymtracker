@@ -4,7 +4,13 @@ import com.gymtracker.gymtracker.entity.WorkoutSession;
 
 import java.time.LocalDate;
 
-public record WorkoutSessionResponse(Long id, String name, LocalDate date, Integer exercises, boolean pr) {
+public record WorkoutSessionResponse(
+        Long id,
+        String name,
+        LocalDate date,
+        Integer exercises,
+        boolean pr
+) {
 
     public static WorkoutSessionResponse from(WorkoutSession workoutSession) {
         return from(workoutSession, workoutSession.getSessionExercises().size(), false);
@@ -14,7 +20,7 @@ public record WorkoutSessionResponse(Long id, String name, LocalDate date, Integ
         return new WorkoutSessionResponse(
                 workoutSession.getId(),
                 workoutSession.getName(),
-                workoutSession.getDate(),
+                workoutSession.getStartedAt().toLocalDate(),
                 exercises,
                 pr);
     }

@@ -11,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -71,14 +70,8 @@ public class PersonalRecordsService {
         return false;
     }
 
-    public Map<Long, Double> getPrWeightByExercise(Long userId) {
-        return personalRecordsRepository.findAll().stream()
-                .filter(pr -> pr.getAppUser() != null && pr.getAppUser().getId().equals(userId))
-                .collect(Collectors.toMap(
-                        pr -> pr.getExercise().getId(),
-                        PersonalRecord::getWeight,
-                        Math::max
-                ));
+    public Set<Long> getPrWorkoutSetIds(Long userId, Long workoutSessionId) {
+        return Set.copyOf(personalRecordsRepository.findWorkoutSetIdsByAppUserIdAndSessionId(userId, workoutSessionId));
     }
 
     public void deletePersonalRecord(Long id) {

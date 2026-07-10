@@ -40,7 +40,8 @@ public class SessionExerciseController {
     @ApiResponse(responseCode = "200", description = "List of session exercises")
     @GetMapping
     public ResponseEntity<List<SessionExerciseResponse>> getSessionExercises(
+            @RequestParam Long userId,
             @Parameter(description = "Session ID") @PathVariable Long sessionId) {
-        return ResponseEntity.ok(workoutSessionService.getSessionExercises(sessionId));
+        return ResponseEntity.ok(workoutSessionService.getSessionExercises(userId, sessionId));
     }
 }

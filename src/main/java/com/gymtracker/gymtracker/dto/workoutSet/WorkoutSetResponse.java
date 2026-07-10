@@ -2,29 +2,24 @@ package com.gymtracker.gymtracker.dto.workoutSet;
 
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 
-import java.util.Map;
+import java.util.Set;
 
-public record WorkoutSetResponse(Long id, Long exerciseId, String exerciseName,
-                                 Double weight, Integer reps, String note, boolean isPR) {
+public record WorkoutSetResponse(Long id, Double weight, Integer reps, boolean isPR) {
+
+    public static WorkoutSetResponse from(WorkoutSet set, boolean isPR) {
+        return new WorkoutSetResponse(
+                set.getId(),
+                set.getWeight(),
+                set.getReps(),
+                isPR);
+    }
+
 
     public static WorkoutSetResponse from(WorkoutSet set) {
         return from(set, false);
     }
 
-    public static WorkoutSetResponse from(WorkoutSet set, boolean isPR) {
-        return new WorkoutSetResponse(
-                set.getId(),
-                set.getSessionExercise().getExercise().getId(),
-                set.getSessionExercise().getExercise().getName(),
-                set.getWeight(),
-                set.getReps(),
-                set.getNote(),
-                isPR);
-    }
-
-    public static WorkoutSetResponse from(WorkoutSet set, Map<Long, Double> prWeights) {
-        Double prWeight = prWeights.get(set.getSessionExercise().getExercise().getId());
-        boolean isPR = set.getWeight() != null && set.getWeight().equals(prWeight);
-        return from(set, isPR);
+    public static WorkoutSetResponse from(WorkoutSet set, Set<Long> prWorkoutSetIds) {
+        return from(set, prWorkoutSetIds.contains(set.getId()));
     }
 }

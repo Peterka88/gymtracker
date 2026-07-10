@@ -16,8 +16,8 @@ public class PersonalRecord {
     @JoinColumn(name = "exerciseId")
     private Exercise exercise;
 
-    @ManyToOne
-    @JoinColumn(name = "workoutSetId")
+    @OneToOne
+    @JoinColumn(name = "workoutSetId", unique = true)
     private WorkoutSet workoutSet;
 
     @ManyToOne
