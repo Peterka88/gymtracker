@@ -6,6 +6,7 @@ import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionRequestDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
+import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,13 +26,16 @@ public class WorkoutSessionService {
     private static final int DEFAULT_PAGE_SIZE = 10;
 
     private final WorkoutSessionRepository workoutSessionRepository;
+    private final SessionExerciseRepository sessionExerciseRepository;
     private final AppUserService appUserService;
     private final PersonalRecordsService personalRecordsService;
 
     public WorkoutSessionService(WorkoutSessionRepository workoutSessionRepository,
+                                  SessionExerciseRepository sessionExerciseRepository,
                                   AppUserService appUserService,
                                   PersonalRecordsService personalRecordsService) {
         this.workoutSessionRepository = workoutSessionRepository;
+        this.sessionExerciseRepository = sessionExerciseRepository;
         this.appUserService = appUserService;
         this.personalRecordsService = personalRecordsService;
     }
@@ -39,8 +44,17 @@ public class WorkoutSessionService {
         int size = (paramSize == null || paramSize == 0) ? DEFAULT_PAGE_SIZE : paramSize;
         Pageable pageable = PageRequest.of(page == null ? 0 : page, size);
         Set<Long> sessionIdsWithPr = personalRecordsService.getSessionIdsWithPr(userId);
-        return workoutSessionRepository.findAllByAppUserIdOrderByDateDesc(userId, pageable).stream()
-                .map(session -> WorkoutSessionResponse.from(session, sessionIdsWithPr.contains(session.getId())))
+
+        List<WorkoutSession> sessions = workoutSessionRepository.findAllByAppUserIdOrderByDateDesc(userId, pageable);
+        List<Long> sessionIds = sessions.stream().map(WorkoutSession::getId).collect(Collectors.toList());
+        Map<Long, Integer> exerciseCounts = sessionIds.isEmpty() ? Map.of() : sessionExerciseRepository.countBySessionIds(sessionIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
+
+        return sessions.stream()
+                .map(session -> WorkoutSessionResponse.from(
+                        session,
+                        exerciseCounts.getOrDefault(session.getId(), 0),
+                        sessionIdsWithPr.contains(session.getId())))
                 .collect(Collectors.toList());
     }
 

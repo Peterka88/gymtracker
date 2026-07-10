@@ -4,17 +4,18 @@ import com.gymtracker.gymtracker.entity.WorkoutSession;
 
 import java.time.LocalDate;
 
-public record WorkoutSessionResponse(Long id, LocalDate date, Integer exercises, boolean pr) {
+public record WorkoutSessionResponse(Long id, String name, LocalDate date, Integer exercises, boolean pr) {
 
     public static WorkoutSessionResponse from(WorkoutSession workoutSession) {
-        return from(workoutSession, false);
+        return from(workoutSession, workoutSession.getSessionExercises().size(), false);
     }
 
-    public static WorkoutSessionResponse from(WorkoutSession workoutSession, boolean pr) {
+    public static WorkoutSessionResponse from(WorkoutSession workoutSession, int exercises, boolean pr) {
         return new WorkoutSessionResponse(
                 workoutSession.getId(),
+                workoutSession.getName(),
                 workoutSession.getDate(),
-                workoutSession.getSessionExercises().size(),
+                exercises,
                 pr);
     }
 }

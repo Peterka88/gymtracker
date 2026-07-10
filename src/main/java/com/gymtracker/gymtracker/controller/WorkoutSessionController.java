@@ -20,7 +20,7 @@ import java.util.List;
 
 @Tag(name = "Workout Sessions", description = "Manage training sessions")
 @RestController
-@RequestMapping("/api/workout-sessions")
+@RequestMapping("/api/workouts")
 public class WorkoutSessionController {
 
     private final WorkoutSessionService workoutSessionService;
@@ -68,10 +68,10 @@ public class WorkoutSessionController {
                               "instance": "/api/workout-sessions/99"
                             }"""
             )))
-    @GetMapping("/{userId}/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<WorkoutSessionDetailResponse> getWorkoutSessionById(
-            @PathVariable Long userId,
-            @Parameter(description = "Session ID") @PathVariable Long id) {
+            @RequestParam Long userId,
+            @Parameter(description = "Workout Session ID") @PathVariable Long id) {
         return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(userId, id));
     }
 
