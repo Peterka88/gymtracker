@@ -55,8 +55,6 @@ public class WorkoutSetService {
             set.setWeight(dto.getWeight());
         if (dto.getReps() != null)
             set.setReps(dto.getReps());
-        if (dto.getNote() != null)
-            set.setNote(dto.getNote());
         return WorkoutSetResponse.from(workoutSetRepository.save(set));
     }
 
@@ -68,7 +66,6 @@ public class WorkoutSetService {
         set.setSessionExercise(workoutSessionService.getSessionExerciseById(userId, dto.getSessionExerciseId()));
         set.setWeight(dto.getWeight());
         set.setReps(dto.getReps());
-        set.setNote(dto.getNote());
         return set;
     }
 }

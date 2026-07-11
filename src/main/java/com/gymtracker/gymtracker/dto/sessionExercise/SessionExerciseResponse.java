@@ -7,8 +7,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record SessionExerciseResponse(Long id, Long sessionId, Long exerciseId, String exerciseName,
-                                       Integer orderIndex, List<WorkoutSetResponse> workoutSets) {
+public record SessionExerciseResponse(
+        Long id,
+        Long exerciseId,
+        String exerciseName,
+        Integer orderIndex,
+        String note,
+        List<WorkoutSetResponse> workoutSets
+) {
 
     public static SessionExerciseResponse from(SessionExercise sessionExercise) {
         return from(sessionExercise, Set.of());
@@ -17,10 +23,10 @@ public record SessionExerciseResponse(Long id, Long sessionId, Long exerciseId, 
     public static SessionExerciseResponse from(SessionExercise sessionExercise, Set<Long> prWorkoutSetIds) {
         return new SessionExerciseResponse(
                 sessionExercise.getId(),
-                sessionExercise.getSession().getId(),
                 sessionExercise.getExercise().getId(),
                 sessionExercise.getExercise().getName(),
                 sessionExercise.getOrderIndex(),
+                sessionExercise.getNote(),
                 sessionExercise.getWorkoutSets().stream()
                         .map(set -> WorkoutSetResponse.from(set, prWorkoutSetIds))
                         .collect(Collectors.toList())

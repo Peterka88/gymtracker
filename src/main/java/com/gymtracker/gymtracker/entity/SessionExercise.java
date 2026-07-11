@@ -23,6 +23,8 @@ public class SessionExercise {
 
     private Integer orderIndex;
 
+    private String note;
+
     @OneToMany(mappedBy = "sessionExercise", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkoutSet> workoutSets = new ArrayList<>();
 
@@ -34,6 +36,8 @@ public class SessionExercise {
     public void setExercise(Exercise exercise) { this.exercise = exercise; }
     public Integer getOrderIndex() { return orderIndex; }
     public void setOrderIndex(Integer orderIndex) { this.orderIndex = orderIndex; }
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
     public List<WorkoutSet> getWorkoutSets() { return workoutSets; }
     public void setWorkoutSets(List<WorkoutSet> workoutSets) { this.workoutSets = workoutSets; }
 }

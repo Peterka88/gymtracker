@@ -4,7 +4,12 @@ import com.gymtracker.gymtracker.entity.WorkoutSet;
 
 import java.util.Set;
 
-public record WorkoutSetResponse(Long id, Double weight, Integer reps, boolean isPR) {
+public record WorkoutSetResponse(
+        Long id,
+        Double weight,
+        Integer reps,
+        boolean pr
+) {
 
     public static WorkoutSetResponse from(WorkoutSet set, boolean isPR) {
         return new WorkoutSetResponse(

@@ -18,8 +18,6 @@ public class WorkoutSet {
 
     private Integer reps;
 
-    private String note;
-
     public Long getId() {
         return id;
     }
@@ -50,13 +48,5 @@ public class WorkoutSet {
 
     public void setReps(Integer reps) {
         this.reps = reps;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String notes) {
-        this.note = notes;
     }
 }

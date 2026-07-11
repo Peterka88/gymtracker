@@ -65,7 +65,7 @@ public class WorkoutSessionController {
                               "title": "Not Found",
                               "status": 404,
                               "detail": "Workout session not found",
-                              "instance": "/api/workout-sessions/99"
+                              "instance": "/api/workouts/99"
                             }"""
             )))
     @GetMapping("/{id}")
