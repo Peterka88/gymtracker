@@ -1,7 +1,8 @@
 package com.gymtracker.gymtracker.controller;
 
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.WorkoutSessionStartResDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionRequestDTO;
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.WorkoutSessionStartDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
@@ -39,9 +40,9 @@ public class WorkoutSessionController {
                             }"""
             )))
     @PostMapping
-    public ResponseEntity<WorkoutSessionResponse> createWorkoutSession(
+    public ResponseEntity<WorkoutSessionStartResDTO> createWorkoutSession(
             @RequestParam Long userId,
-            @RequestBody @Valid WorkoutSessionRequestDTO dto) {
+            @RequestBody @Valid WorkoutSessionStartDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutSessionService.createWorkoutSession(userId,dto));
     }
 

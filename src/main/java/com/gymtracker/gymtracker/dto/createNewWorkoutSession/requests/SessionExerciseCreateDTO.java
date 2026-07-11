@@ -1,8 +1,8 @@
-package com.gymtracker.gymtracker.dto.sessionExercise;
+package com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests;
 
 import jakarta.validation.constraints.NotNull;
 
-public class SessionExerciseDTO {
+public class SessionExerciseCreateDTO {
 
     @NotNull(message = "Exercise must be specified")
     private Long exerciseId;
@@ -13,15 +13,8 @@ public class SessionExerciseDTO {
         return exerciseId;
     }
 
-    public void setExerciseId(Long exerciseId) {
-        this.exerciseId = exerciseId;
-    }
-
     public Integer getOrderIndex() {
         return orderIndex;
     }
 
-    public void setOrderIndex(Integer orderIndex) {
-        this.orderIndex = orderIndex;
-    }
 }

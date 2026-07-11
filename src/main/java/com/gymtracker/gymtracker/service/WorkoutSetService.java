@@ -1,6 +1,7 @@
 package com.gymtracker.gymtracker.service;
 
-import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetDTO;
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.WorkoutSetCreateDTO;
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.WorkoutCreateSetResDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.AppUser;
@@ -9,9 +10,6 @@ import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class WorkoutSetService {
@@ -31,14 +29,14 @@ public class WorkoutSetService {
         this.appUserService = appUserService;
     }
 
-    public WorkoutSetResponse createWorkoutSet(Long userId, WorkoutSetDTO dto) {
+    public WorkoutCreateSetResDTO createWorkoutSet(Long userId, Long exerciseSessionId, WorkoutSetCreateDTO dto) {
         AppUser user = appUserService.getAppUserById(userId);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-        WorkoutSet saved = workoutSetRepository.save(mapDtoToSet(userId, new WorkoutSet(), dto));
+        WorkoutSet saved = workoutSetRepository.save(mapDtoToSet(userId, exerciseSessionId, dto));
         boolean isPR = personalRecordsService.checkAndUpdate(saved, user);
-        return WorkoutSetResponse.from(saved, isPR);
+        return WorkoutCreateSetResDTO.from(saved, isPR);
     }
 
     public WorkoutSetResponse getWorkoutSetById(Long id) {
@@ -62,8 +60,9 @@ public class WorkoutSetService {
         workoutSetRepository.deleteById(id);
     }
 
-    private WorkoutSet mapDtoToSet(Long userId, WorkoutSet set, WorkoutSetDTO dto) {
-        set.setSessionExercise(workoutSessionService.getSessionExerciseById(userId, dto.getSessionExerciseId()));
+    private WorkoutSet mapDtoToSet(Long userId, Long exerciseSessionId, WorkoutSetCreateDTO dto) {
+        WorkoutSet set = new WorkoutSet();
+        set.setSessionExercise(workoutSessionService.getSessionExerciseById(userId, exerciseSessionId));
         set.setWeight(dto.getWeight());
         set.setReps(dto.getReps());
         return set;

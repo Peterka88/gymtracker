@@ -1,9 +1,11 @@
 package com.gymtracker.gymtracker.service;
 
-import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseDTO;
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.SessionExerciseCreateDTO;
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.SessionExerciseCreateResDTO;
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.WorkoutSessionStartResDTO;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionRequestDTO;
+import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.WorkoutSessionStartDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.SessionExercise;
@@ -31,6 +33,7 @@ public class WorkoutSessionService {
     private final AppUserService appUserService;
     private final PersonalRecordsService personalRecordsService;
     private final ExerciseService exerciseService;
+
     public WorkoutSessionService(WorkoutSessionRepository workoutSessionRepository,
                                   SessionExerciseRepository sessionExerciseRepository,
                                   AppUserService appUserService,
@@ -83,16 +86,14 @@ public class WorkoutSessionService {
         );
     }
 
-    public WorkoutSessionResponse createWorkoutSession(Long userId, WorkoutSessionRequestDTO dto) {
+    public WorkoutSessionStartResDTO createWorkoutSession(Long userId, WorkoutSessionStartDTO dto) {
         var appUser = appUserService.getAppUserById(userId);
 
         WorkoutSession session = new WorkoutSession();
-        session.setName(dto.getName() == null ? dto.getStartedAt().toString() : dto.getName());
+        session.setName(dto.getName() == null ? "Nový tréning" : dto.getName());
         session.setStartedAt(dto.getStartedAt());
-        session.setDurationMinutes(dto.getDurationMinutes());
-        session.setNote(dto.getNote());
         session.setAppUser(appUser);
-        return WorkoutSessionResponse.from(workoutSessionRepository.save(session));
+        return WorkoutSessionStartResDTO.from(workoutSessionRepository.save(session));
     }
 
     public void deleteWorkoutSession(Long userId, Long id) {
@@ -107,14 +108,14 @@ public class WorkoutSessionService {
                 .collect(Collectors.toList());
     }
 
-    public SessionExerciseResponse createSessionExercise(Long userId, Long sessionId, SessionExerciseDTO dto) {
+    public SessionExerciseCreateResDTO createSessionExercise(Long userId, Long sessionId, SessionExerciseCreateDTO dto) {
         WorkoutSession session = getWorkoutSessionById(userId, sessionId);
 
         SessionExercise sessionExercise = new SessionExercise();
         sessionExercise.setSession(session);
         sessionExercise.setExercise(exerciseService.getExerciseById(dto.getExerciseId()));
         sessionExercise.setOrderIndex(dto.getOrderIndex());
-        return SessionExerciseResponse.from(sessionExerciseRepository.save(sessionExercise));
+        return SessionExerciseCreateResDTO.from(sessionExerciseRepository.save(sessionExercise));
     }
 
     public List<SessionExerciseResponse> getSessionExercises(Long userId, Long sessionId) {
