@@ -1,7 +1,7 @@
 package com.gymtracker.gymtracker.service;
 
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.WorkoutSetCreateDTO;
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.WorkoutCreateSetResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSetCreateDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutCreateSetResDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.AppUser;

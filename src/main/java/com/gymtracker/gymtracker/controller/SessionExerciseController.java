@@ -1,8 +1,7 @@
 package com.gymtracker.gymtracker.controller;
 
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.SessionExerciseCreateDTO;
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.SessionExerciseCreateResDTO;
-import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseCreateDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.SessionExerciseCreateResDTO;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +11,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Session Exercises", description = "Exercises assigned to a workout session, in order")
 @RestController
@@ -24,10 +25,10 @@ public class SessionExerciseController {
         this.workoutSessionService = workoutSessionService;
     }
 
-    @Operation(summary = "Add an exercise to a workout session")
-    @ApiResponse(responseCode = "201", description = "Exercise added to session")
+    @Operation(summary = "Add exercises to a workout session")
+    @ApiResponse(responseCode = "201", description = "Exercises added to session")
     @PostMapping
-    public ResponseEntity<SessionExerciseCreateResDTO> createSessionExercise(
+    public ResponseEntity<List<SessionExerciseCreateResDTO>> createSessionExercise(
             @RequestParam Long userId,
             @Parameter(description = "Session ID") @PathVariable Long sessionId,
             @RequestBody @Valid SessionExerciseCreateDTO dto) {

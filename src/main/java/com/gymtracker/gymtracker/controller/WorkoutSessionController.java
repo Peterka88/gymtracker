@@ -1,8 +1,7 @@
 package com.gymtracker.gymtracker.controller;
 
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.WorkoutSessionStartResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.WorkoutSessionStartDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
@@ -12,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,18 +30,10 @@ public class WorkoutSessionController {
 
     @Operation(summary = "Create a new workout session")
     @ApiResponse(responseCode = "201", description = "Session created")
-    @ApiResponse(responseCode = "400", description = "Validation failed",
-            content = @Content(mediaType = "application/json", examples = @ExampleObject(
-                    value = """
-                            {
-                              "startedAt": "Start time cannot be null"
-                            }"""
-            )))
     @PostMapping
     public ResponseEntity<WorkoutSessionStartResDTO> createWorkoutSession(
-            @RequestParam Long userId,
-            @RequestBody @Valid WorkoutSessionStartDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(workoutSessionService.createWorkoutSession(userId,dto));
+            @RequestParam Long userId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(workoutSessionService.createWorkoutSession(userId));
     }
 
     @Operation(summary = "Get all workout sessions")

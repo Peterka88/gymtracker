@@ -1,11 +1,10 @@
 package com.gymtracker.gymtracker.service;
 
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.SessionExerciseCreateDTO;
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.SessionExerciseCreateResDTO;
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses.WorkoutSessionStartResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseCreateDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.SessionExerciseCreateResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResDTO;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.createNewWorkoutSession.requests.WorkoutSessionStartDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.SessionExercise;
@@ -18,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,12 +87,13 @@ public class WorkoutSessionService {
         );
     }
 
-    public WorkoutSessionStartResDTO createWorkoutSession(Long userId, WorkoutSessionStartDTO dto) {
+    public WorkoutSessionStartResDTO createWorkoutSession(Long userId) {
         var appUser = appUserService.getAppUserById(userId);
+        LocalDateTime now = LocalDateTime.now();
 
         WorkoutSession session = new WorkoutSession();
-        session.setName(dto.getName() == null ? "Nový tréning" : dto.getName());
-        session.setStartedAt(dto.getStartedAt());
+        session.setName(now.toLocalDate().toString());
+        session.setStartedAt(now);
         session.setAppUser(appUser);
         return WorkoutSessionStartResDTO.from(workoutSessionRepository.save(session));
     }
@@ -108,14 +110,22 @@ public class WorkoutSessionService {
                 .collect(Collectors.toList());
     }
 
-    public SessionExerciseCreateResDTO createSessionExercise(Long userId, Long sessionId, SessionExerciseCreateDTO dto) {
+    public List<SessionExerciseCreateResDTO> createSessionExercise(Long userId, Long sessionId, SessionExerciseCreateDTO dto) {
         WorkoutSession session = getWorkoutSessionById(userId, sessionId);
+        int nextOrderIndex = sessionExerciseRepository.countSessionExerciseBySessionId(sessionId);
 
-        SessionExercise sessionExercise = new SessionExercise();
-        sessionExercise.setSession(session);
-        sessionExercise.setExercise(exerciseService.getExerciseById(dto.getExerciseId()));
-        sessionExercise.setOrderIndex(dto.getOrderIndex());
-        return SessionExerciseCreateResDTO.from(sessionExerciseRepository.save(sessionExercise));
+        List<SessionExercise> sessionExercises = new ArrayList<>();
+        for (Long exerciseId : dto.getExerciseIds()) {
+            SessionExercise sessionExercise = new SessionExercise();
+            sessionExercise.setSession(session);
+            sessionExercise.setExercise(exerciseService.getExerciseById(exerciseId));
+            sessionExercise.setOrderIndex(nextOrderIndex++);
+            sessionExercises.add(sessionExercise);
+        }
+
+        return sessionExerciseRepository.saveAll(sessionExercises).stream()
+                .map(SessionExerciseCreateResDTO::from)
+                .collect(Collectors.toList());
     }
 
     public List<SessionExerciseResponse> getSessionExercises(Long userId, Long sessionId) {

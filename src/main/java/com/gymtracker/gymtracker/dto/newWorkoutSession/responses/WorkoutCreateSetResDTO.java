@@ -1,4 +1,4 @@
-package com.gymtracker.gymtracker.dto.createNewWorkoutSession.responses;
+package com.gymtracker.gymtracker.dto.newWorkoutSession.responses;
 
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 
