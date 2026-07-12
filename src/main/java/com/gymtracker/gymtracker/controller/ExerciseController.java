@@ -1,6 +1,8 @@
 package com.gymtracker.gymtracker.controller;
 
+import com.gymtracker.gymtracker.dto.common.PageResponse;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
+import com.gymtracker.gymtracker.dto.exercise.ExerciseResponseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Tag(name = "Exercises", description = "Manage exercises and their muscle groups")
 @RestController
 @RequestMapping("/api/exercises")
@@ -28,10 +28,13 @@ public class ExerciseController {
     }
 
     @Operation(summary = "Get all exercises")
-    @ApiResponse(responseCode = "200", description = "List of all exercises")
+    @ApiResponse(responseCode = "200", description = "Page of exercises")
     @GetMapping
-    public ResponseEntity<List<Exercise>> getAll() {
-        return ResponseEntity.ok(exerciseService.getAllExercises());
+    public ResponseEntity<PageResponse<ExerciseResponseDTO>> getAll(
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "0") Integer page
+    ) {
+        return ResponseEntity.ok(exerciseService.getAllExercises(size, page));
     }
 
     @Operation(summary = "Create a new exercise")
