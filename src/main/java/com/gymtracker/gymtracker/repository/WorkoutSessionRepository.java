@@ -12,5 +12,7 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
 
     Optional<WorkoutSession> findByAppUserIdAndId(Long appUserId, Long id);
 
-    void deleteAllByAppUserIdAndId(Long appUserId, Long id);
+    Optional<WorkoutSession> findByAppUserIdAndEndedAtIsNull(Long appUserId);
+
+    void deleteByAppUserIdAndId(Long appUser_id, Long id);
 }

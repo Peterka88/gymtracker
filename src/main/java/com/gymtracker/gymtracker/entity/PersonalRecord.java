@@ -1,6 +1,8 @@
 package com.gymtracker.gymtracker.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +20,7 @@ public class PersonalRecord {
 
     @OneToOne
     @JoinColumn(name = "workoutSetId", unique = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private WorkoutSet workoutSet;
 
     @ManyToOne

@@ -1,6 +1,8 @@
 package com.gymtracker.gymtracker.controller;
 
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionFinishResDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResult;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
@@ -28,12 +30,32 @@ public class WorkoutSessionController {
         this.workoutSessionService = workoutSessionService;
     }
 
-    @Operation(summary = "Create a new workout session")
-    @ApiResponse(responseCode = "201", description = "Session created")
+    @Operation(summary = "Create a new workout session, or return the already active one")
+    @ApiResponse(responseCode = "201", description = "New session created")
+    @ApiResponse(responseCode = "200", description = "An active (unfinished) session already existed")
     @PostMapping
     public ResponseEntity<WorkoutSessionStartResDTO> createWorkoutSession(
             @RequestParam Long userId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(workoutSessionService.createWorkoutSession(userId));
+        WorkoutSessionStartResult result = workoutSessionService.createWorkoutSession(userId);
+        HttpStatus status = result.created() ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(result.session());
+    }
+
+    @Operation(summary = "Finish an active workout session")
+    @ApiResponse(responseCode = "200", description = "Session finished")
+    @ApiResponse(responseCode = "409", description = "Session already finished",
+            content = @Content(mediaType = "application/json", examples = @ExampleObject(
+                    value = """
+                            {
+                              "error": "Workout session already finished"
+                            }"""
+            )))
+    @ApiResponse(responseCode = "404", description = "Session not found")
+    @PostMapping("/{id}/finish")
+    public ResponseEntity<WorkoutSessionFinishResDTO> finishWorkoutSession(
+            @RequestParam Long userId,
+            @Parameter(description = "Session ID") @PathVariable Long id) {
+        return ResponseEntity.ok(workoutSessionService.finishWorkoutSession(userId, id));
     }
 
     @Operation(summary = "Get all workout sessions")
@@ -66,25 +88,6 @@ public class WorkoutSessionController {
         return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(userId, id));
     }
 
-    @Operation(summary = "Get all workout sets for a session")
-    @ApiResponse(responseCode = "200", description = "List of workout sets")
-    @ApiResponse(responseCode = "404", description = "Session not found",
-            content = @Content(mediaType = "application/json", examples = @ExampleObject(
-                    value = """
-                            {
-                              "title": "Not Found",
-                              "status": 404,
-                              "detail": "Workout session not found",
-                              "instance": "/api/workout-sessions/99/workout-sets"
-                            }"""
-            )))
-    @GetMapping("/{id}/workout-sets")
-    public ResponseEntity<List<WorkoutSetResponse>> getWorkoutSetsBySessionId(
-            @PathVariable Long userId,
-            @Parameter(description = "Session ID") @PathVariable Long id) {
-        return ResponseEntity.ok(workoutSessionService.getWorkoutSetsBySessionId(userId ,id));
-    }
-
     @Operation(summary = "Delete a workout session and all its sets")
     @ApiResponse(responseCode = "204", description = "Session deleted")
     @ApiResponse(responseCode = "404", description = "Session not found",
@@ -99,7 +102,7 @@ public class WorkoutSessionController {
             )))
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSession(
-            @PathVariable Long userId,
+            @RequestParam Long userId,
             @Parameter(description = "Session ID") @PathVariable Long id) {
         workoutSessionService.deleteWorkoutSession(userId, id);
         return ResponseEntity.noContent().build();

@@ -2,7 +2,9 @@ package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseCreateDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.SessionExerciseCreateResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionFinishResDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResult;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
@@ -15,8 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +82,7 @@ public class WorkoutSessionService {
                 session.getId(),
                 session.getName(),
                 session.getStartedAt(),
+                session.getEndedAt(),
                 session.getDurationMinutes(),
                 session.getNote(),
                 !prWorkoutSetIds.isEmpty(),
@@ -87,7 +92,12 @@ public class WorkoutSessionService {
         );
     }
 
-    public WorkoutSessionStartResDTO createWorkoutSession(Long userId) {
+    public WorkoutSessionStartResult createWorkoutSession(Long userId) {
+        var activeSession = workoutSessionRepository.findByAppUserIdAndEndedAtIsNull(userId);
+        if (activeSession.isPresent()) {
+            return new WorkoutSessionStartResult(WorkoutSessionStartResDTO.from(activeSession.get()), false);
+        }
+
         var appUser = appUserService.getAppUserById(userId);
         LocalDateTime now = LocalDateTime.now();
 
@@ -95,11 +105,24 @@ public class WorkoutSessionService {
         session.setName(now.toLocalDate().toString());
         session.setStartedAt(now);
         session.setAppUser(appUser);
-        return WorkoutSessionStartResDTO.from(workoutSessionRepository.save(session));
+        WorkoutSession saved = workoutSessionRepository.save(session);
+        return new WorkoutSessionStartResult(WorkoutSessionStartResDTO.from(saved), true);
     }
 
-    public void deleteWorkoutSession(Long userId, Long id) {
-        workoutSessionRepository.deleteAllByAppUserIdAndId(userId, id);
+    public WorkoutSessionFinishResDTO finishWorkoutSession(Long userId, Long id) {
+        WorkoutSession session = getWorkoutSessionById(userId, id);
+        if (session.getEndedAt() != null) {
+            throw new IllegalArgumentException("Workout session already finished");
+        }
+
+        session.setEndedAt(LocalDateTime.now());
+        session.setDurationMinutes((int) Duration.between(session.getStartedAt(), session.getEndedAt()).toMinutes());
+        return WorkoutSessionFinishResDTO.from(workoutSessionRepository.save(session));
+    }
+
+    @Transactional
+    public void deleteWorkoutSession(Long userId, Long sessionId) {
+        workoutSessionRepository.deleteByAppUserIdAndId(userId, sessionId);
     }
 
     public List<WorkoutSetResponse> getWorkoutSetsBySessionId(Long userId, Long id) {
