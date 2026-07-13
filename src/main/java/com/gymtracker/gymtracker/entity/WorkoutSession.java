@@ -20,6 +20,8 @@ public class WorkoutSession {
     @Column(nullable = false)
     private LocalDateTime startedAt;
 
+    private LocalDateTime endedAt;
+
     private Integer durationMinutes;
 
     private String note;
@@ -53,6 +55,14 @@ public class WorkoutSession {
 
     public void setStartedAt(LocalDateTime startedAt) {
         this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getEndedAt() {
+        return endedAt;
+    }
+
+    public void setEndedAt(LocalDateTime endedAt) {
+        this.endedAt = endedAt;
     }
 
     public Integer getDurationMinutes() {
