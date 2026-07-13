@@ -19,11 +19,6 @@ public record WorkoutSetResponse(
                 isPR);
     }
 
-
-    public static WorkoutSetResponse from(WorkoutSet set) {
-        return from(set, false);
-    }
-
     public static WorkoutSetResponse from(WorkoutSet set, Set<Long> prWorkoutSetIds) {
         return from(set, prWorkoutSetIds.contains(set.getId()));
     }

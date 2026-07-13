@@ -5,7 +5,6 @@ import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionS
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResult;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
-import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -1,6 +1,6 @@
 package com.gymtracker.gymtracker.dto.newWorkoutSession.requests;
 
-public class WorkoutSetCreateDTO {
+public class WorkoutSetReqDTO {
 
     private Double weight;
 

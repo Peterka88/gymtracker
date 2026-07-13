@@ -1,6 +1,6 @@
 package com.gymtracker.gymtracker.controller;
 
-import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSetCreateDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSetReqDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutCreateSetResDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
@@ -28,12 +28,11 @@ public class WorkoutSetController {
         this.workoutSetService = workoutSetService;
     }
 
-
     @PostMapping
     public ResponseEntity<WorkoutCreateSetResDTO> createWorkoutSet(
             @PathVariable Long exerciseSessionId,
             @Parameter(description = "User ID") @RequestParam Long userId,
-            @RequestBody @Valid WorkoutSetCreateDTO dto) {
+            @RequestBody @Valid WorkoutSetReqDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutSetService.createWorkoutSet(userId, exerciseSessionId, dto));
     }
 
@@ -49,12 +48,12 @@ public class WorkoutSetController {
                               "instance": "/api/workout-sets/99"
                             }"""
             )))
-    @PatchMapping("/{id}")
-    public ResponseEntity<WorkoutSetResponse> partialUpdateWorkoutSet(
-            @PathVariable Long userId,
-            @Parameter(description = "Workout set ID") @PathVariable Long id,
-            @RequestBody WorkoutSetPatchDTO dto) {
-        return ResponseEntity.ok(workoutSetService.partialUpdateWorkoutSet(userId, id, dto));
+    @PutMapping("/{setId}")
+    public ResponseEntity<WorkoutSetResponse> updateWorkoutSet(
+            @RequestParam Long userId,
+            @Parameter(description = "Workout set ID") @PathVariable Long setId,
+            @RequestBody WorkoutSetReqDTO dto) {
+        return ResponseEntity.ok(workoutSetService.updateWorkoutSet(userId, setId, dto));
     }
 
     @Operation(summary = "Delete a workout set by ID")

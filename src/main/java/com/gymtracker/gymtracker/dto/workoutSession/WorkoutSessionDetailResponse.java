@@ -9,6 +9,7 @@ public record WorkoutSessionDetailResponse(
         Long id,
         String name,
         LocalDateTime startedAt,
+        LocalDateTime endedAt,
         Integer duration,
         String note,
         boolean pr,
