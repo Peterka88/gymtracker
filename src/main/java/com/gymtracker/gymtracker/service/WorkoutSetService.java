@@ -2,13 +2,13 @@ package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSetReqDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutCreateSetResDTO;
-import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.AppUser;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -29,6 +29,7 @@ public class WorkoutSetService {
         this.appUserService = appUserService;
     }
 
+    @Transactional
     public WorkoutCreateSetResDTO createWorkoutSet(Long userId, Long exerciseSessionId, WorkoutSetReqDTO dto) {
         AppUser user = appUserService.getAppUserById(userId);
         if (user == null) {
@@ -39,6 +40,7 @@ public class WorkoutSetService {
         return WorkoutCreateSetResDTO.from(saved, isPR);
     }
 
+    @Transactional
     public WorkoutSetResponse updateWorkoutSet(Long userId, Long id, WorkoutSetReqDTO dto) {
         WorkoutSet set = workoutSetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found"));
@@ -47,8 +49,9 @@ public class WorkoutSetService {
         set.setReps(dto.getReps());
 
         AppUser user = appUserService.getAppUserById(userId);
-        boolean isPR = personalRecordsService.checkAndUpdate(set, user);
+        personalRecordsService.deleteByWorkoutSetId(id);
 
+        boolean isPR = personalRecordsService.checkAndUpdate(set, user);
         return WorkoutSetResponse.from(workoutSetRepository.save(set), isPR);
     }
 

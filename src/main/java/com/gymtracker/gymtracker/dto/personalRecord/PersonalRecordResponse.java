@@ -16,9 +16,9 @@ public record PersonalRecordResponse(Long id, Long userId, Long exerciseId, Stri
                 pr.getAppUser() != null ? pr.getAppUser().getId() : null,
                 pr.getExercise().getId(),
                 pr.getExercise().getName(),
-                pr.getWeight(),
-                pr.getReps(),
-                pr.getAchievedAt(),
+                pr.getWorkoutSet().getWeight(),
+                pr.getWorkoutSet().getReps(),
+                pr.getWorkoutSet().getSessionExercise().getSession().getStartedAt(),
                 pr.getWorkoutSet() != null ? pr.getWorkoutSet().getId() : null
         );
     }

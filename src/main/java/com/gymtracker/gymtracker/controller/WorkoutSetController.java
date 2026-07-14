@@ -2,7 +2,6 @@ package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSetReqDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutCreateSetResDTO;
-import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetPatchDTO;
 import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.service.WorkoutSetService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 // TODO: replace @RequestParam Long userId with @AuthenticationPrincipal once JWT is implemented
 @Tag(name = "Workout Sets", description = "Manage individual sets within a workout session")
 @RestController
-@RequestMapping("/api/workouts/exercises/{exerciseSessionId}/sets")
 public class WorkoutSetController {
 
     private final WorkoutSetService workoutSetService;
@@ -28,7 +26,7 @@ public class WorkoutSetController {
         this.workoutSetService = workoutSetService;
     }
 
-    @PostMapping
+    @PostMapping("/api/workouts/exercises/{exerciseSessionId}/sets")
     public ResponseEntity<WorkoutCreateSetResDTO> createWorkoutSet(
             @PathVariable Long exerciseSessionId,
             @Parameter(description = "User ID") @RequestParam Long userId,
@@ -48,7 +46,7 @@ public class WorkoutSetController {
                               "instance": "/api/workout-sets/99"
                             }"""
             )))
-    @PutMapping("/{setId}")
+    @PutMapping("/api/workout-sets/{setId}")
     public ResponseEntity<WorkoutSetResponse> updateWorkoutSet(
             @RequestParam Long userId,
             @Parameter(description = "Workout set ID") @PathVariable Long setId,
@@ -68,7 +66,7 @@ public class WorkoutSetController {
                               "instance": "/api/workout-sets/99"
                             }"""
             )))
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/api/workout-sets/{id}")
     public ResponseEntity<Void> deleteWorkoutSet(
             @Parameter(description = "Workout set ID") @PathVariable Long id) {
         workoutSetService.deleteWorkoutSet(id);

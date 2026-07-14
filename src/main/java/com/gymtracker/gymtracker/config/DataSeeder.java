@@ -21,18 +21,15 @@ public class DataSeeder implements CommandLineRunner {
     private final AppUserRepository appUserRepository;
     private final ExerciseRepository exerciseRepository;
     private final WorkoutSessionRepository workoutSessionRepository;
-    private final PersonalRecordsRepository personalRecordsRepository;
     private final WeightLogRepository weightLogRepository;
 
     public DataSeeder(AppUserRepository appUserRepository,
                        ExerciseRepository exerciseRepository,
                        WorkoutSessionRepository workoutSessionRepository,
-                       PersonalRecordsRepository personalRecordsRepository,
                        WeightLogRepository weightLogRepository) {
         this.appUserRepository = appUserRepository;
         this.exerciseRepository = exerciseRepository;
         this.workoutSessionRepository = workoutSessionRepository;
-        this.personalRecordsRepository = personalRecordsRepository;
         this.weightLogRepository = weightLogRepository;
     }
 
@@ -95,10 +92,6 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         if (isNewUser) {
-            seedPersonalRecord(user, exercises.get("Bench Press"), 80.0, 6, LocalDateTime.now().minusDays(0));
-            seedPersonalRecord(user, exercises.get("Squat"), 110.0, 4, LocalDateTime.now().minusDays(4));
-            seedPersonalRecord(user, exercises.get("Barbell Row"), 65.0, 6, LocalDateTime.now().minusDays(2));
-
             seedWeightLog(user, 84.5, LocalDateTime.now().minusDays(14));
             seedWeightLog(user, 84.1, LocalDateTime.now().minusDays(10));
             seedWeightLog(user, 83.6, LocalDateTime.now().minusDays(7));
@@ -180,16 +173,6 @@ public class DataSeeder implements CommandLineRunner {
             session.getSessionExercises().add(sessionExercise);
         }
         workoutSessionRepository.save(session);
-    }
-
-    private void seedPersonalRecord(AppUser user, Exercise exercise, double weight, int reps, LocalDateTime achievedAt) {
-        PersonalRecord pr = new PersonalRecord();
-        pr.setAppUser(user);
-        pr.setExercise(exercise);
-        pr.setWeight(weight);
-        pr.setReps(reps);
-        pr.setAchievedAt(achievedAt);
-        personalRecordsRepository.save(pr);
     }
 
     private void seedWeightLog(AppUser user, double weight, LocalDateTime loggedAt) {

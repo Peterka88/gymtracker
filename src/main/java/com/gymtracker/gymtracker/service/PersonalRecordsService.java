@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -43,6 +42,10 @@ public class PersonalRecordsService {
         );
     }
 
+    public void deleteByWorkoutSetId(Long setId) {
+        personalRecordsRepository.deleteByWorkoutSetId(setId);
+    }
+
     public List<PersonalRecordResponse> getPersonalRecordsByExercise(Long exerciseId, Long userId) {
         return personalRecordsRepository.findByExerciseIdAndAppUserIdOrderByAchievedAtDesc(exerciseId, userId).stream()
                 .map(PersonalRecordResponse::from)
@@ -50,20 +53,20 @@ public class PersonalRecordsService {
     }
 
     // Called automatically after each WorkoutSet save — always inserts a new PR row if it's a new best
+    // TODO: editing or deleting a WorkoutSet after the fact doesn't recompute PR history — a lowered/removed
+    // PR can leave stale rows, and a set that should retroactively become a PR (e.g. it beats what's now the
+    // corrected record) never gets picked up. Needs a recompute-on-write pass over that exercise+user's sets.
     public boolean checkAndUpdate(WorkoutSet set, AppUser user) {
         if (set.getWeight() == null) return false;
 
         Optional<PersonalRecord> currentBest = personalRecordsRepository
-                .findTopByExerciseIdAndAppUserIdOrderByWeightDesc(set.getSessionExercise().getExercise().getId(), user.getId());
+                .findTopByExerciseIdAndAppUserIdOrderByWorkoutSetWeightDesc(set.getSessionExercise().getExercise().getId(), user.getId());
 
-        if (currentBest.isEmpty() || set.getWeight() > currentBest.get().getWeight()) {
+        if (currentBest.isEmpty() || set.getWeight() > currentBest.get().getWorkoutSet().getWeight()) {
             PersonalRecord pr = new PersonalRecord();
             pr.setExercise(set.getSessionExercise().getExercise());
             pr.setWorkoutSet(set);
             pr.setAppUser(user);
-            pr.setWeight(set.getWeight());
-            pr.setReps(set.getReps());
-            pr.setAchievedAt(LocalDateTime.now());
             personalRecordsRepository.save(pr);
             return true;
         }
