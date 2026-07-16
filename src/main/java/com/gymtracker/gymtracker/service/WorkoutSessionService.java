@@ -1,14 +1,12 @@
 package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseCreateDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.SessionExerciseCreateResDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionFinishResDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResult;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseNoteDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.*;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
-import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.SessionExercise;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
@@ -22,10 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,6 +104,18 @@ public class WorkoutSessionService {
         return new WorkoutSessionStartResult(WorkoutSessionStartResDTO.from(saved), true);
     }
 
+    public WorkoutSessionPatchResDTO updateWorkoutSessionNameOrNote(Long id, Long userId, WorkoutSessionPatchDTO dto) {
+        WorkoutSession session = workoutSessionRepository.findByAppUserIdAndId(userId, id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Session not found"));
+
+        if (dto.getName() != null)
+            session.setName(dto.getName());
+        if (dto.getNote() != null)
+            session.setNote(dto.getNote());
+
+        return WorkoutSessionPatchResDTO.from(workoutSessionRepository.save(session));
+    }
+
     public WorkoutSessionFinishResDTO finishWorkoutSession(Long userId, Long id) {
         WorkoutSession session = getWorkoutSessionById(userId, id);
         if (session.getEndedAt() != null) {
@@ -123,14 +130,6 @@ public class WorkoutSessionService {
     @Transactional
     public void deleteWorkoutSession(Long userId, Long sessionId) {
         workoutSessionRepository.deleteByAppUserIdAndId(userId, sessionId);
-    }
-
-    public List<WorkoutSetResponse> getWorkoutSetsBySessionId(Long userId, Long id) {
-        Set<Long> prWorkoutSetIds = personalRecordsService.getPrWorkoutSetIds(userId, id);
-        return getWorkoutSessionById(userId, id).getSessionExercises().stream()
-                .flatMap(sessionExercise -> sessionExercise.getWorkoutSets().stream())
-                .map(set -> WorkoutSetResponse.from(set, prWorkoutSetIds))
-                .collect(Collectors.toList());
     }
 
     public List<SessionExerciseCreateResDTO> createSessionExercise(Long userId, Long sessionId, SessionExerciseCreateDTO dto) {
@@ -151,16 +150,17 @@ public class WorkoutSessionService {
                 .collect(Collectors.toList());
     }
 
-    public List<SessionExerciseResponse> getSessionExercises(Long userId, Long sessionId) {
-        Set<Long> prWorkoutSetIds = personalRecordsService.getPrWorkoutSetIds(userId, sessionId);
-        return sessionExerciseRepository.findAllBySessionIdWithSetsOrderByOrderIndexAsc(sessionId).stream()
-                .map(se -> SessionExerciseResponse.from(se, prWorkoutSetIds))
-                .collect(Collectors.toList());
-    }
-
     public SessionExercise getSessionExerciseById(Long userId, Long id) {
         return sessionExerciseRepository.findByIdAndSessionAppUserId(id, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session exercise not found"));
+    }
+
+    public void updateSessionExerciseNote(Long userId, Long id, SessionExerciseNoteDTO dto) {
+        SessionExercise currentSessionExercise = sessionExerciseRepository.findByIdAndSessionAppUserId(id, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session exercies not found"));
+
+        currentSessionExercise.setNote(dto.getNote());
+        sessionExerciseRepository.save(currentSessionExercise);
     }
 
     private Map<Long, Integer> countExercisesBySessionIds(List<Long> sessionIds) {

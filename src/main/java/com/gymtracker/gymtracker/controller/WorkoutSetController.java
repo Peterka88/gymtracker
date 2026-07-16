@@ -34,7 +34,7 @@ public class WorkoutSetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutSetService.createWorkoutSet(userId, exerciseSessionId, dto));
     }
 
-    @Operation(summary = "Partially update a workout set")
+    @Operation(summary = "Update a workout set", description = "Replaces the weight and reps of an existing workout set")
     @ApiResponse(responseCode = "200", description = "Workout set updated")
     @ApiResponse(responseCode = "404", description = "Workout set not found",
             content = @Content(mediaType = "application/json", examples = @ExampleObject(
@@ -48,7 +48,7 @@ public class WorkoutSetController {
             )))
     @PutMapping("/api/workout-sets/{setId}")
     public ResponseEntity<WorkoutSetResponse> updateWorkoutSet(
-            @RequestParam Long userId,
+            @Parameter(description = "User ID") @RequestParam Long userId,
             @Parameter(description = "Workout set ID") @PathVariable Long setId,
             @RequestBody WorkoutSetReqDTO dto) {
         return ResponseEntity.ok(workoutSetService.updateWorkoutSet(userId, setId, dto));

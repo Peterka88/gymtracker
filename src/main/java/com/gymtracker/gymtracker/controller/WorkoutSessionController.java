@@ -1,6 +1,8 @@
 package com.gymtracker.gymtracker.controller;
 
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionFinishResDTO;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionPatchResDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResult;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -85,6 +88,14 @@ public class WorkoutSessionController {
             @RequestParam Long userId,
             @Parameter(description = "Workout Session ID") @PathVariable Long id) {
         return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(userId, id));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<WorkoutSessionPatchResDTO> updateNameOrNote(
+            @RequestParam Long userId,
+            @PathVariable Long id,
+            @RequestBody @Valid WorkoutSessionPatchDTO dto) {
+        return ResponseEntity.ok(workoutSessionService.updateWorkoutSessionNameOrNote(id, userId, dto));
     }
 
     @Operation(summary = "Delete a workout session and all its sets")
