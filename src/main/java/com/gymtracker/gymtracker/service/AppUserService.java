@@ -25,6 +25,6 @@ public class AppUserService {
     }
 
     private boolean isUsernameTaken(String username) {
-        return appUserRepository.findByUsername(username) != null;
+        return appUserRepository.findByUsername(username).isPresent();
     }
 }

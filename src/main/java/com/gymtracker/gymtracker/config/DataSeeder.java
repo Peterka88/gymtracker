@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Profile("local")
@@ -27,16 +28,16 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        AppUser user = appUserRepository.findByUsername("martin");
-        boolean isNewUser = user == null;
-        if (isNewUser) {
-            user = new AppUser();
-            user.setName("Martin Petrina");
-            user.setUsername("martin");
-            user.setPassword("test1234");
-            user.setHeight(180.0);
-            user = appUserRepository.save(user);
-        }
+        Optional<AppUser> existingUser = appUserRepository.findByUsername("martin");
+        boolean isNewUser = existingUser.isEmpty();
+        AppUser user = existingUser.orElseGet(() -> {
+            AppUser newUser = new AppUser();
+            newUser.setName("Martin Petrina");
+            newUser.setUsername("martin");
+            newUser.setPassword("test1234");
+            newUser.setHeight(180.0);
+            return appUserRepository.save(newUser);
+        });
 
         Map<String, Exercise> exercises = ensureExercises();
 
