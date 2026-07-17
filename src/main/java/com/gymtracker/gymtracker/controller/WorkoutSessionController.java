@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,13 +25,10 @@ import java.util.List;
 @Tag(name = "Workout Sessions", description = "Manage training sessions")
 @RestController
 @RequestMapping("/api/workouts")
+@RequiredArgsConstructor
 public class WorkoutSessionController {
 
     private final WorkoutSessionService workoutSessionService;
-
-    public WorkoutSessionController(WorkoutSessionService workoutSessionService) {
-        this.workoutSessionService = workoutSessionService;
-    }
 
     @Operation(summary = "Create a new workout session, or return the already active one")
     @ApiResponse(responseCode = "201", description = "New session created")

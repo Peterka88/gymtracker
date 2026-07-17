@@ -5,6 +5,7 @@ import com.gymtracker.gymtracker.entity.AppUser;
 import com.gymtracker.gymtracker.entity.PersonalRecord;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.PersonalRecordsRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,13 +16,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PersonalRecordsService {
 
     private final PersonalRecordsRepository personalRecordsRepository;
-
-    public PersonalRecordsService(PersonalRecordsRepository personalRecordsRepository) {
-        this.personalRecordsRepository = personalRecordsRepository;
-    }
 
     public List<PersonalRecordResponse> getAllPersonalRecords(Long userId) {
         return personalRecordsRepository.findByAppUserIdOrderByAchievedAtDesc(userId).stream()

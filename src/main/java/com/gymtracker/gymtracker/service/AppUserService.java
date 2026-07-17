@@ -4,16 +4,14 @@ import com.gymtracker.gymtracker.dto.appUser.AppUserRequestDTO;
 import com.gymtracker.gymtracker.dto.appUser.AppUserResponseDTO;
 import com.gymtracker.gymtracker.entity.AppUser;
 import com.gymtracker.gymtracker.repository.AppUserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AppUserService {
 
     private final AppUserRepository appUserRepository;
-
-    public AppUserService(AppUserRepository appUserRepository) {
-        this.appUserRepository = appUserRepository;
-    }
 
     public AppUserResponseDTO createUser(AppUserRequestDTO dto) {
         if (isUsernameTaken(dto.username())) {

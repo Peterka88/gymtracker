@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +19,10 @@ import org.springframework.web.bind.annotation.*;
 // TODO: replace @RequestParam Long userId with @AuthenticationPrincipal once JWT is implemented
 @Tag(name = "Workout Sets", description = "Manage individual sets within a workout session")
 @RestController
+@RequiredArgsConstructor
 public class WorkoutSetController {
 
     private final WorkoutSetService workoutSetService;
-
-    public WorkoutSetController(WorkoutSetService workoutSetService) {
-        this.workoutSetService = workoutSetService;
-    }
 
     @PostMapping("/api/workouts/exercises/{exerciseSessionId}/sets")
     public ResponseEntity<WorkoutCreateSetResDTO> createWorkoutSet(

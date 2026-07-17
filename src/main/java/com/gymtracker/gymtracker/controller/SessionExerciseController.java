@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +18,10 @@ import java.util.List;
 
 @Tag(name = "Session Exercises", description = "Exercises assigned to a workout session, in order")
 @RestController
+@RequiredArgsConstructor
 public class SessionExerciseController {
 
     private final WorkoutSessionService workoutSessionService;
-
-    public SessionExerciseController(WorkoutSessionService workoutSessionService) {
-        this.workoutSessionService = workoutSessionService;
-    }
 
     @Operation(summary = "Add exercises to a workout session")
     @ApiResponse(responseCode = "201", description = "Exercises added to session")

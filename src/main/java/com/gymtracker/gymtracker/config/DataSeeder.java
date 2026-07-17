@@ -2,6 +2,7 @@ package com.gymtracker.gymtracker.config;
 
 import com.gymtracker.gymtracker.entity.*;
 import com.gymtracker.gymtracker.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 @Component
 @Profile("local")
+@RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
     private static final int TARGET_SESSION_COUNT = 24;
@@ -22,16 +24,6 @@ public class DataSeeder implements CommandLineRunner {
     private final ExerciseRepository exerciseRepository;
     private final WorkoutSessionRepository workoutSessionRepository;
     private final WeightLogRepository weightLogRepository;
-
-    public DataSeeder(AppUserRepository appUserRepository,
-                       ExerciseRepository exerciseRepository,
-                       WorkoutSessionRepository workoutSessionRepository,
-                       WeightLogRepository weightLogRepository) {
-        this.appUserRepository = appUserRepository;
-        this.exerciseRepository = exerciseRepository;
-        this.workoutSessionRepository = workoutSessionRepository;
-        this.weightLogRepository = weightLogRepository;
-    }
 
     @Override
     public void run(String... args) {

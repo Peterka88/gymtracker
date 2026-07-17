@@ -1,10 +1,18 @@
 package com.gymtracker.gymtracker.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "personal_records")
 public class PersonalRecord {
 
@@ -25,12 +33,4 @@ public class PersonalRecord {
     @JoinColumn(name = "userId")
     private AppUser appUser;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Exercise getExercise() { return exercise; }
-    public void setExercise(Exercise exercise) { this.exercise = exercise; }
-    public WorkoutSet getWorkoutSet() { return workoutSet; }
-    public void setWorkoutSet(WorkoutSet workoutSet) { this.workoutSet = workoutSet; }
-    public AppUser getAppUser() { return appUser; }
-    public void setAppUser(AppUser appUser) { this.appUser = appUser; }
 }
