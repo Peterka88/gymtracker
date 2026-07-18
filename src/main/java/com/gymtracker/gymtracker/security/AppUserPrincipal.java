@@ -23,6 +23,10 @@ public class AppUserPrincipal implements UserDetails {
         return appUser.getId();
     }
 
+    public String getFirstName() {
+        return appUser.getName().strip().split("\\s+")[0];
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
