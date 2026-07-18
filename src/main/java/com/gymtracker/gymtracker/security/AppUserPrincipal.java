@@ -2,6 +2,7 @@ package com.gymtracker.gymtracker.security;
 
 import com.gymtracker.gymtracker.entity.AppUser;
 import lombok.Getter;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Getter
+@NullMarked
 public class AppUserPrincipal implements UserDetails {
 
     private final AppUser appUser;

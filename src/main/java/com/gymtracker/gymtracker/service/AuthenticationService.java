@@ -10,6 +10,7 @@ import com.gymtracker.gymtracker.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,13 +41,13 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
+        Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),request.getPassword()
+                        request.getUsername(), request.getPassword()
                 )
         );
-        var user = repository.findByUsername(request.getUsername()).orElseThrow();
-        var jwtToken = jwtService.generateToken(new AppUserPrincipal(user));
+        var principal = (AppUserPrincipal) auth.getPrincipal();
+        var jwtToken = jwtService.generateToken(principal);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
