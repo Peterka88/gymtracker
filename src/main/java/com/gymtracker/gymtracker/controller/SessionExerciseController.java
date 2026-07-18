@@ -3,6 +3,7 @@ package com.gymtracker.gymtracker.controller;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseCreateDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseNoteDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.SessionExerciseCreateResDTO;
+import com.gymtracker.gymtracker.security.AppUserPrincipal;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,18 +29,18 @@ public class SessionExerciseController {
     @ApiResponse(responseCode = "201", description = "Exercises added to session")
     @PostMapping("/api/workouts/{sessionId}/exercises")
     public ResponseEntity<List<SessionExerciseCreateResDTO>> createSessionExercise(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @Parameter(description = "Session ID") @PathVariable Long sessionId,
             @RequestBody @Valid SessionExerciseCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(workoutSessionService.createSessionExercise(userId, sessionId, dto));
+                .body(workoutSessionService.createSessionExercise(principal.getId(), sessionId, dto));
     }
 
     @PatchMapping("/api/session-exercises/{id}")
     public ResponseEntity<Void> updateSessionExerciseNote(
-            @RequestParam Long userId, @PathVariable Long id,
+            @AuthenticationPrincipal AppUserPrincipal principal, @PathVariable Long id,
             @RequestBody @Valid SessionExerciseNoteDTO dto) {
-        workoutSessionService.updateSessionExerciseNote(userId, id, dto);
+        workoutSessionService.updateSessionExerciseNote(principal.getId(), id, dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

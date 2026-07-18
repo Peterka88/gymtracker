@@ -7,6 +7,7 @@ import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionS
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResult;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
+import com.gymtracker.gymtracker.security.AppUserPrincipal;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,8 +37,8 @@ public class WorkoutSessionController {
     @ApiResponse(responseCode = "200", description = "An active (unfinished) session already existed")
     @PostMapping
     public ResponseEntity<WorkoutSessionStartResDTO> createWorkoutSession(
-            @RequestParam Long userId) {
-        WorkoutSessionStartResult result = workoutSessionService.createWorkoutSession(userId);
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        WorkoutSessionStartResult result = workoutSessionService.createWorkoutSession(principal.getId());
         HttpStatus status = result.created() ? HttpStatus.CREATED : HttpStatus.OK;
         return ResponseEntity.status(status).body(result.session());
     }
@@ -53,20 +55,20 @@ public class WorkoutSessionController {
     @ApiResponse(responseCode = "404", description = "Session not found")
     @PostMapping("/{id}/finish")
     public ResponseEntity<WorkoutSessionFinishResDTO> finishWorkoutSession(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @Parameter(description = "Session ID") @PathVariable Long id) {
-        return ResponseEntity.ok(workoutSessionService.finishWorkoutSession(userId, id));
+        return ResponseEntity.ok(workoutSessionService.finishWorkoutSession(principal.getId(), id));
     }
 
     @Operation(summary = "Get all workout sessions")
     @ApiResponse(responseCode = "200", description = "List of all sessions")
     @GetMapping()
     public ResponseEntity<List<WorkoutSessionResponse>> getWorkoutSessions(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @Parameter(description = "Page size, defaults to 10 when omitted") @RequestParam(required = false) Integer size,
             @Parameter(description = "Page number, defaults to 0") @RequestParam(required = false) Integer page
     ) {
-        return ResponseEntity.ok(workoutSessionService.getWorkoutSessions(userId, size, page));
+        return ResponseEntity.ok(workoutSessionService.getWorkoutSessions(principal.getId(), size, page));
     }
 
     @Operation(summary = "Get workout session detail with all sets")
@@ -83,17 +85,17 @@ public class WorkoutSessionController {
             )))
     @GetMapping("/{id}")
     public ResponseEntity<WorkoutSessionDetailResponse> getWorkoutSessionById(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @Parameter(description = "Workout Session ID") @PathVariable Long id) {
-        return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(userId, id));
+        return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(principal.getId(), id));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<WorkoutSessionPatchResDTO> updateNameOrNote(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @PathVariable Long id,
             @RequestBody @Valid WorkoutSessionPatchDTO dto) {
-        return ResponseEntity.ok(workoutSessionService.updateWorkoutSessionNameOrNote(id, userId, dto));
+        return ResponseEntity.ok(workoutSessionService.updateWorkoutSessionNameOrNote(id, principal.getId(), dto));
     }
 
     @Operation(summary = "Delete a workout session and all its sets")
@@ -110,9 +112,9 @@ public class WorkoutSessionController {
             )))
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSession(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @Parameter(description = "Session ID") @PathVariable Long id) {
-        workoutSessionService.deleteWorkoutSession(userId, id);
+        workoutSessionService.deleteWorkoutSession(principal.getId(), id);
         return ResponseEntity.noContent().build();
     }
 }

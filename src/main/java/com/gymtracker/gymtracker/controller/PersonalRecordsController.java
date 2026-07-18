@@ -1,6 +1,7 @@
 package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.personalRecord.PersonalRecordResponse;
+import com.gymtracker.gymtracker.security.AppUserPrincipal;
 import com.gymtracker.gymtracker.service.PersonalRecordsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,11 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// TODO: replace @RequestParam Long userId with @AuthenticationPrincipal once JWT is implemented
 @Tag(name = "Personal Records", description = "View best lifts per exercise, updated automatically")
 @RestController
 @RequestMapping("/api/personal-records")
@@ -27,12 +28,12 @@ public class PersonalRecordsController {
     @ApiResponse(responseCode = "200", description = "List of personal records")
     @GetMapping
     public ResponseEntity<List<PersonalRecordResponse>> getAllPersonalRecords(
-            @Parameter(description = "User ID") @RequestParam Long userId,
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @Parameter(description = "Filter by exercise ID") @RequestParam(required = false) Long exerciseId) {
         if (exerciseId != null) {
-            return ResponseEntity.ok(personalRecordsService.getPersonalRecordsByExercise(exerciseId, userId));
+            return ResponseEntity.ok(personalRecordsService.getPersonalRecordsByExercise(exerciseId, principal.getId()));
         }
-        return ResponseEntity.ok(personalRecordsService.getBestPRsForUser(userId));
+        return ResponseEntity.ok(personalRecordsService.getBestPRsForUser(principal.getId()));
     }
 
     @Operation(summary = "Get a personal record by ID")
