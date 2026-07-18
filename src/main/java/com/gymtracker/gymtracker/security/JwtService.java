@@ -40,7 +40,12 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        if (userDetails instanceof AppUserPrincipal principal) {
+            String name = principal.getFirstName();
+            extraClaims.put("name", name);
+        }
+        return generateToken(extraClaims, userDetails);
     }
 
     public boolean isTokenValid(String jwtToken, UserDetails userDetails) {
