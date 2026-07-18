@@ -1,14 +1,4 @@
 package com.gymtracker.gymtracker.dto.weightLog;
 
-public class WeightLogRequestDTO {
-
-    private Double weight;
-
-    public Double getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Double weight) {
-        this.weight = weight;
-    }
+public record WeightLogRequestDTO(Double weight) {
 }

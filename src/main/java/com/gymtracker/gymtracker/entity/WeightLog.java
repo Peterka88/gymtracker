@@ -1,11 +1,19 @@
 package com.gymtracker.gymtracker.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "weight_logs")
 public class WeightLog {
 
@@ -15,18 +23,10 @@ public class WeightLog {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private AppUser appUser;
+    private AppUser user;
 
     private Double weight;
 
     private LocalDateTime loggedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public AppUser getUser() { return appUser; }
-    public void setUser(AppUser appUser) { this.appUser = appUser; }
-    public Double getWeight() { return weight; }
-    public void setWeight(Double weight) { this.weight = weight; }
-    public LocalDateTime getLoggedAt() { return loggedAt; }
-    public void setLoggedAt(LocalDateTime loggedAt) { this.loggedAt = loggedAt; }
 }

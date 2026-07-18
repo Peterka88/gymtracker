@@ -4,6 +4,7 @@ import com.gymtracker.gymtracker.dto.weightLog.WeightLogRequestDTO;
 import com.gymtracker.gymtracker.dto.weightLog.WeightLogResponseDTO;
 import com.gymtracker.gymtracker.entity.WeightLog;
 import com.gymtracker.gymtracker.repository.WeightLogRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,15 +14,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class WeightLogService {
 
     private final WeightLogRepository weightLogRepository;
     private final AppUserService appUserService;
-
-    public WeightLogService(WeightLogRepository weightLogRepository, AppUserService appUserService) {
-        this.weightLogRepository = weightLogRepository;
-        this.appUserService = appUserService;
-    }
 
     public WeightLogResponseDTO create(Long userId, WeightLogRequestDTO dto) {
         var user = appUserService.getAppUserById(userId);
@@ -30,13 +27,13 @@ public class WeightLogService {
         }
         WeightLog log = new WeightLog();
         log.setUser(user);
-        log.setWeight(dto.getWeight());
+        log.setWeight(dto.weight());
         log.setLoggedAt(LocalDateTime.now());
         return WeightLogResponseDTO.from(weightLogRepository.save(log));
     }
 
     public List<WeightLogResponseDTO> getLogsForUser(Long userId) {
-        return weightLogRepository.findByAppUserIdOrderByLoggedAtDesc(userId)
+        return weightLogRepository.findByUserIdOrderByLoggedAtDesc(userId)
                 .stream()
                 .map(WeightLogResponseDTO::from)
                 .collect(Collectors.toList());

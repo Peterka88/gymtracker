@@ -1,11 +1,16 @@
 package com.gymtracker.gymtracker.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "session_exercises")
 public class SessionExercise {
 
@@ -15,6 +20,8 @@ public class SessionExercise {
 
     @ManyToOne
     @JoinColumn(name = "sessionId", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private WorkoutSession session;
 
     @ManyToOne
@@ -26,18 +33,7 @@ public class SessionExercise {
     private String note;
 
     @OneToMany(mappedBy = "sessionExercise", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<WorkoutSet> workoutSets = new ArrayList<>();
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public WorkoutSession getSession() { return session; }
-    public void setSession(WorkoutSession session) { this.session = session; }
-    public Exercise getExercise() { return exercise; }
-    public void setExercise(Exercise exercise) { this.exercise = exercise; }
-    public Integer getOrderIndex() { return orderIndex; }
-    public void setOrderIndex(Integer orderIndex) { this.orderIndex = orderIndex; }
-    public String getNote() { return note; }
-    public void setNote(String note) { this.note = note; }
-    public List<WorkoutSet> getWorkoutSets() { return workoutSets; }
-    public void setWorkoutSets(List<WorkoutSet> workoutSets) { this.workoutSets = workoutSets; }
 }

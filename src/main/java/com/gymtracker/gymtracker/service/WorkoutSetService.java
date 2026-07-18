@@ -6,28 +6,20 @@ import com.gymtracker.gymtracker.dto.workoutSet.WorkoutSetResponse;
 import com.gymtracker.gymtracker.entity.AppUser;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 public class WorkoutSetService {
 
     private final WorkoutSetRepository workoutSetRepository;
     private final WorkoutSessionService workoutSessionService;
     private final PersonalRecordsService personalRecordsService;
     private final AppUserService appUserService;
-
-    public WorkoutSetService(WorkoutSetRepository workoutSetRepository,
-                             WorkoutSessionService workoutSessionService,
-                             PersonalRecordsService personalRecordsService,
-                             AppUserService appUserService) {
-        this.workoutSetRepository = workoutSetRepository;
-        this.workoutSessionService = workoutSessionService;
-        this.personalRecordsService = personalRecordsService;
-        this.appUserService = appUserService;
-    }
 
     @Transactional
     public WorkoutCreateSetResDTO createWorkoutSet(Long userId, Long exerciseSessionId, WorkoutSetReqDTO dto) {
@@ -45,8 +37,8 @@ public class WorkoutSetService {
         WorkoutSet set = workoutSetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found"));
 
-        set.setWeight(dto.getWeight());
-        set.setReps(dto.getReps());
+        set.setWeight(dto.weight());
+        set.setReps(dto.reps());
 
         AppUser user = appUserService.getAppUserById(userId);
         personalRecordsService.deleteByWorkoutSetId(id);
@@ -62,8 +54,8 @@ public class WorkoutSetService {
     private WorkoutSet mapDtoToSet(Long userId, Long exerciseSessionId, WorkoutSetReqDTO dto) {
         WorkoutSet set = new WorkoutSet();
         set.setSessionExercise(workoutSessionService.getSessionExerciseById(userId, exerciseSessionId));
-        set.setWeight(dto.getWeight());
-        set.setReps(dto.getReps());
+        set.setWeight(dto.weight());
+        set.setReps(dto.reps());
         return set;
     }
 }

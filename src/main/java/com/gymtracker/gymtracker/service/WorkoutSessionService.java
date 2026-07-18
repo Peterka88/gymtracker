@@ -11,6 +11,7 @@ import com.gymtracker.gymtracker.entity.SessionExercise;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class WorkoutSessionService {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
@@ -33,18 +35,6 @@ public class WorkoutSessionService {
     private final AppUserService appUserService;
     private final PersonalRecordsService personalRecordsService;
     private final ExerciseService exerciseService;
-
-    public WorkoutSessionService(WorkoutSessionRepository workoutSessionRepository,
-                                  SessionExerciseRepository sessionExerciseRepository,
-                                  AppUserService appUserService,
-                                  PersonalRecordsService personalRecordsService,
-                                  ExerciseService exerciseService) {
-        this.workoutSessionRepository = workoutSessionRepository;
-        this.sessionExerciseRepository = sessionExerciseRepository;
-        this.appUserService = appUserService;
-        this.personalRecordsService = personalRecordsService;
-        this.exerciseService = exerciseService;
-    }
 
     public List<WorkoutSessionResponse> getWorkoutSessions(Long userId, Integer paramSize, Integer page) {
         int size = (paramSize == null || paramSize == 0) ? DEFAULT_PAGE_SIZE : paramSize;
@@ -108,10 +98,10 @@ public class WorkoutSessionService {
         WorkoutSession session = workoutSessionRepository.findByAppUserIdAndId(userId, id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Session not found"));
 
-        if (dto.getName() != null)
-            session.setName(dto.getName());
-        if (dto.getNote() != null)
-            session.setNote(dto.getNote());
+        if (dto.name() != null)
+            session.setName(dto.name());
+        if (dto.note() != null)
+            session.setNote(dto.note());
 
         return WorkoutSessionPatchResDTO.from(workoutSessionRepository.save(session));
     }
@@ -137,7 +127,7 @@ public class WorkoutSessionService {
         int nextOrderIndex = sessionExerciseRepository.countSessionExerciseBySessionId(sessionId);
 
         List<SessionExercise> sessionExercises = new ArrayList<>();
-        for (Long exerciseId : dto.getExerciseIds()) {
+        for (Long exerciseId : dto.exerciseIds()) {
             SessionExercise sessionExercise = new SessionExercise();
             sessionExercise.setSession(session);
             sessionExercise.setExercise(exerciseService.getExerciseById(exerciseId));
@@ -159,7 +149,7 @@ public class WorkoutSessionService {
         SessionExercise currentSessionExercise = sessionExerciseRepository.findByIdAndSessionAppUserId(id, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session exercies not found"));
 
-        currentSessionExercise.setNote(dto.getNote());
+        currentSessionExercise.setNote(dto.note());
         sessionExerciseRepository.save(currentSessionExercise);
     }
 
@@ -169,5 +159,10 @@ public class WorkoutSessionService {
         }
         return sessionExerciseRepository.countBySessionIds(sessionIds).stream()
                 .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
+    }
+
+    @Transactional
+    public void deleteSessionExercise(Long userId, Long id) {
+        sessionExerciseRepository.deleteByIdAndSessionAppUserId(id, userId);
     }
 }
