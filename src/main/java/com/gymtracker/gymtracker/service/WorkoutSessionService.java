@@ -160,4 +160,9 @@ public class WorkoutSessionService {
         return sessionExerciseRepository.countBySessionIds(sessionIds).stream()
                 .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
     }
+
+    @Transactional
+    public void deleteSessionExercise(Long userId, Long id) {
+        sessionExerciseRepository.deleteByIdAndSessionAppUserId(id, userId);
+    }
 }

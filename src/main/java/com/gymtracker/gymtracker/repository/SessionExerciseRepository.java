@@ -15,6 +15,8 @@ public interface SessionExerciseRepository extends JpaRepository<SessionExercise
 
     Optional<SessionExercise> findByIdAndSessionAppUserId(Long id, Long appUserId);
 
+    void deleteByIdAndSessionAppUserId(Long id, Long sessionAppUserId);
+
     @Query("SELECT se.session.id, COUNT(se) FROM SessionExercise se WHERE se.session.id IN :sessionIds GROUP BY se.session.id")
     List<Object[]> countBySessionIds(@Param("sessionIds") List<Long> sessionIds);
 

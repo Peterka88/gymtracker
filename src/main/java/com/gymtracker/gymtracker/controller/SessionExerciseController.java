@@ -38,9 +38,18 @@ public class SessionExerciseController {
 
     @PatchMapping("/api/session-exercises/{id}")
     public ResponseEntity<Void> updateSessionExerciseNote(
-            @AuthenticationPrincipal AppUserPrincipal principal, @PathVariable Long id,
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @PathVariable Long id,
             @RequestBody @Valid SessionExerciseNoteDTO dto) {
         workoutSessionService.updateSessionExerciseNote(principal.getId(), id, dto);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/api/session-exercises/{id}")
+    public ResponseEntity<Void> deleteSessionExercise(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @PathVariable Long id) {
+        workoutSessionService.deleteSessionExercise(principal.getId(), id);
+        return ResponseEntity.noContent().build();
     }
 }
