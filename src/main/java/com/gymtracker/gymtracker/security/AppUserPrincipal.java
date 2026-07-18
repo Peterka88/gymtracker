@@ -1,7 +1,6 @@
 package com.gymtracker.gymtracker.security;
 
 import com.gymtracker.gymtracker.entity.AppUser;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
