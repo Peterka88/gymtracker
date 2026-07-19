@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class WorkoutSetService {
@@ -37,6 +39,9 @@ public class WorkoutSetService {
         WorkoutSet set = workoutSetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found"));
 
+        Long setOwnerUserId = set.getSessionExercise().getSession().getAppUser().getId();
+        if (!Objects.equals(userId, setOwnerUserId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found");
+
         set.setWeight(dto.weight());
         set.setReps(dto.reps());
 
@@ -47,7 +52,14 @@ public class WorkoutSetService {
         return WorkoutSetResponse.from(workoutSetRepository.save(set), isPR);
     }
 
-    public void deleteWorkoutSet(Long id) {
+    @Transactional
+    public void deleteWorkoutSet(Long userId, Long id) {
+        WorkoutSet set = workoutSetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found"));
+
+        Long setOwnerUserId = set.getSessionExercise().getSession().getAppUser().getId();
+        if (!Objects.equals(userId, setOwnerUserId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout set not found");
+
         workoutSetRepository.deleteById(id);
     }
 

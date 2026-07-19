@@ -67,8 +67,9 @@ public class WorkoutSetController {
             )))
     @DeleteMapping("/api/workout-sets/{id}")
     public ResponseEntity<Void> deleteWorkoutSet(
+            @AuthenticationPrincipal AppUserPrincipal principal,
             @Parameter(description = "Workout set ID") @PathVariable Long id) {
-        workoutSetService.deleteWorkoutSet(id);
+        workoutSetService.deleteWorkoutSet(principal.getId(), id);
         return ResponseEntity.noContent().build();
     }
 }

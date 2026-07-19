@@ -54,22 +54,22 @@ public class PersonalRecordsController {
         return ResponseEntity.ok(personalRecordsService.getPersonalRecordById(id));
     }
 
-    @Operation(summary = "Delete a personal record by ID")
-    @ApiResponse(responseCode = "204", description = "Personal record deleted")
-    @ApiResponse(responseCode = "404", description = "Personal record not found",
-            content = @Content(mediaType = "application/json", examples = @ExampleObject(
-                    value = """
-                            {
-                              "title": "Not Found",
-                              "status": 404,
-                              "detail": "Personal record not found",
-                              "instance": "/api/personal-records/99"
-                            }"""
-            )))
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePersonalRecord(
-            @Parameter(description = "Personal record ID") @PathVariable Long id) {
-        personalRecordsService.deletePersonalRecord(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @Operation(summary = "Delete a personal record by ID")
+//    @ApiResponse(responseCode = "204", description = "Personal record deleted")
+//    @ApiResponse(responseCode = "404", description = "Personal record not found",
+//            content = @Content(mediaType = "application/json", examples = @ExampleObject(
+//                    value = """
+//                            {
+//                              "title": "Not Found",
+//                              "status": 404,
+//                              "detail": "Personal record not found",
+//                              "instance": "/api/personal-records/99"
+//                            }"""
+//            )))
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deletePersonalRecord(
+//            @Parameter(description = "Personal record ID") @PathVariable Long id) {
+//        personalRecordsService.deletePersonalRecord(id);
+//        return ResponseEntity.noContent().build();
+//    }
 }

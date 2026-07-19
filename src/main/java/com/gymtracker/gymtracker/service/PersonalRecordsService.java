@@ -21,11 +21,11 @@ public class PersonalRecordsService {
 
     private final PersonalRecordsRepository personalRecordsRepository;
 
-    public List<PersonalRecordResponse> getAllPersonalRecords(Long userId) {
-        return personalRecordsRepository.findByAppUserIdOrderByAchievedAtDesc(userId).stream()
-                .map(PersonalRecordResponse::from)
-                .collect(Collectors.toList());
-    }
+//    public List<PersonalRecordResponse> getAllPersonalRecords(Long userId) {
+//        return personalRecordsRepository.findByAppUserIdOrderByAchievedAtDesc(userId).stream()
+//                .map(PersonalRecordResponse::from)
+//                .collect(Collectors.toList());
+//    }
 
     public List<PersonalRecordResponse> getBestPRsForUser(Long userId) {
         return personalRecordsRepository.findBestPerExerciseForUser(userId).stream()
@@ -75,9 +75,9 @@ public class PersonalRecordsService {
         return Set.copyOf(personalRecordsRepository.findWorkoutSetIdsByAppUserIdAndSessionId(userId, workoutSessionId));
     }
 
-    public void deletePersonalRecord(Long id) {
-        personalRecordsRepository.deleteById(id);
-    }
+//    public void deletePersonalRecord(Long id) {
+//        personalRecordsRepository.deleteById(id);
+//    }
 
     public Set<Long> getSessionIdsWithPr(Long userId) {
         return Set.copyOf(personalRecordsRepository.findSessionIdsWithPrForUser(userId));
