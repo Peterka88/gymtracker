@@ -2,7 +2,8 @@ package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.common.PageResponse;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseResponseDTO;
+import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
+import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +26,23 @@ public class ExerciseController {
 
     private final ExerciseService exerciseService;
 
-    @Operation(summary = "Get all exercises")
-    @ApiResponse(responseCode = "200", description = "Page of exercises")
     @GetMapping
-    public ResponseEntity<PageResponse<ExerciseResponseDTO>> getAll(
-            @RequestParam(required = false) Integer size,
+    public ResponseEntity<PageResponse<ExerciseListResponseDTO>> getAll(
+        @RequestParam(defaultValue = "10") Integer size,
+        @RequestParam(defaultValue = "0") Integer page
+    ) {
+        return ResponseEntity.ok(exerciseService.getAll(size, page));
+    }
+
+
+    @Operation(summary = "Get all exercises for workout")
+    @ApiResponse(responseCode = "200", description = "Page of exercises")
+    @GetMapping("/workout")
+    public ResponseEntity<PageResponse<ExerciseWorkoutAddResponseDTO>> getAllForWorkout(
+            @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "0") Integer page
     ) {
-        return ResponseEntity.ok(exerciseService.getAllExercises(size, page));
+        return ResponseEntity.ok(exerciseService.getAllForWorkout(size, page));
     }
 
     @Operation(summary = "Create a new exercise")
