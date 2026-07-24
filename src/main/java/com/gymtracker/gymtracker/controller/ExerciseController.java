@@ -26,6 +26,21 @@ public class ExerciseController {
 
     private final ExerciseService exerciseService;
 
+    @Operation(summary = "Create a new exercise")
+    @ApiResponse(responseCode = "201", description = "Exercise created")
+    @ApiResponse(responseCode = "400", description = "Validation failed",
+            content = @Content(mediaType = "application/json", examples = @ExampleObject(
+                    value = """
+                            {
+                              "name": "Exercise name cannot be blank",
+                              "muscleGroup": "Muscle group must be specified"
+                            }"""
+            )))
+    @PostMapping
+    public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
+    }
+
     @GetMapping
     public ResponseEntity<PageResponse<ExerciseListResponseDTO>> getAll(
         @RequestParam(defaultValue = "10") Integer size,
@@ -43,21 +58,6 @@ public class ExerciseController {
             @RequestParam(defaultValue = "0") Integer page
     ) {
         return ResponseEntity.ok(exerciseService.getAllForWorkout(size, page));
-    }
-
-    @Operation(summary = "Create a new exercise")
-    @ApiResponse(responseCode = "201", description = "Exercise created")
-    @ApiResponse(responseCode = "400", description = "Validation failed",
-            content = @Content(mediaType = "application/json", examples = @ExampleObject(
-                    value = """
-                            {
-                              "name": "Exercise name cannot be blank",
-                              "muscleGroup": "Muscle group must be specified"
-                            }"""
-            )))
-    @PostMapping
-    public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
     }
 
     @Operation(summary = "Delete an exercise by ID")

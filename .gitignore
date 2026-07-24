@@ -38,3 +38,4 @@ out/
 
 ### Local Secrets ###
 application-local.properties
+src/main/java/com/gymtracker/gymtracker/config/DataSeeder.java

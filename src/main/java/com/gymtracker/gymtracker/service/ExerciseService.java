@@ -71,9 +71,14 @@ public class ExerciseService {
 
 
     public Exercise createExercise(ExerciseDTO dto) {
+        if (exerciseRepository.findByName(dto.name()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exercise with this name already exists");
+        }
+
         Exercise exercise = new Exercise();
         exercise.setName(dto.name());
         exercise.setMuscleGroup(dto.muscleGroup());
+        exercise.setEquipment(dto.equipment());
         return exerciseRepository.save(exercise);
     }
 
