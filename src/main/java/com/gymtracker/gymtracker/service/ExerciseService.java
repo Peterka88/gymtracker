@@ -5,6 +5,7 @@ import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
+import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.repository.ExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +28,17 @@ public class ExerciseService {
     private final ExerciseRepository exerciseRepository;
     private final WorkoutSetRepository workoutSetRepository;
 
-    public PageResponse<ExerciseListResponseDTO> getAll(Integer size, Integer page) {
+    public PageResponse<ExerciseListResponseDTO> getAll(Integer size, Integer page, String search, List<MuscleGroup> muscleGroupList) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Exercise> exercises = exerciseRepository.findAll(pageable);
+        String searchPattern = (search == null || search.isBlank())
+                ? null
+                : "%" + search.toLowerCase() + "%";
+
+        Page<Exercise> exercises;
+        exercises = (muscleGroupList == null || muscleGroupList.isEmpty())
+                ? exerciseRepository.search(searchPattern, null, pageable)
+                : exerciseRepository.search(searchPattern, muscleGroupList, pageable);
         List<Long> ids = exercises.stream().map((Exercise::getId)).toList();
         Map<Long, WorkoutSetRepository.LastPerformedProjection> lastPerformedProjectionMap;
 

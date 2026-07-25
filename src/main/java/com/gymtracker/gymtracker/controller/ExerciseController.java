@@ -5,6 +5,7 @@ import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
+import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Exercises", description = "Manage exercises and their muscle groups")
 @RestController
@@ -43,10 +46,12 @@ public class ExerciseController {
 
     @GetMapping
     public ResponseEntity<PageResponse<ExerciseListResponseDTO>> getAll(
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) List<MuscleGroup> muscleGroups,
         @RequestParam(defaultValue = "10") Integer size,
         @RequestParam(defaultValue = "0") Integer page
     ) {
-        return ResponseEntity.ok(exerciseService.getAll(size, page));
+        return ResponseEntity.ok(exerciseService.getAll(size, page, search, muscleGroups));
     }
 
 
