@@ -4,6 +4,7 @@ public enum MuscleGroup {
     CHEST,
     BACK,
     SHOULDERS,
+    TRAPS,
     BICEPS,
     TRICEPS,
     FOREARMS,

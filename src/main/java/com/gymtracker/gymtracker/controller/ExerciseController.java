@@ -2,8 +2,10 @@ package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.common.PageResponse;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseResponseDTO;
+import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
+import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
+import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "Exercises", description = "Manage exercises and their muscle groups")
 @RestController
 @RequestMapping("/api/exercises")
@@ -24,16 +28,6 @@ import org.springframework.web.bind.annotation.*;
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
-
-    @Operation(summary = "Get all exercises")
-    @ApiResponse(responseCode = "200", description = "Page of exercises")
-    @GetMapping
-    public ResponseEntity<PageResponse<ExerciseResponseDTO>> getAll(
-            @RequestParam(required = false) Integer size,
-            @RequestParam(defaultValue = "0") Integer page
-    ) {
-        return ResponseEntity.ok(exerciseService.getAllExercises(size, page));
-    }
 
     @Operation(summary = "Create a new exercise")
     @ApiResponse(responseCode = "201", description = "Exercise created")
@@ -48,6 +42,27 @@ public class ExerciseController {
     @PostMapping
     public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<ExerciseListResponseDTO>> getAll(
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) List<MuscleGroup> muscleGroups,
+        @RequestParam(defaultValue = "10") Integer size,
+        @RequestParam(defaultValue = "0") Integer page
+    ) {
+        return ResponseEntity.ok(exerciseService.getAll(size, page, search, muscleGroups));
+    }
+
+
+    @Operation(summary = "Get all exercises for workout")
+    @ApiResponse(responseCode = "200", description = "Page of exercises")
+    @GetMapping("/workout")
+    public ResponseEntity<PageResponse<ExerciseWorkoutAddResponseDTO>> getAllForWorkout(
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "0") Integer page
+    ) {
+        return ResponseEntity.ok(exerciseService.getAllForWorkout(size, page));
     }
 
     @Operation(summary = "Delete an exercise by ID")

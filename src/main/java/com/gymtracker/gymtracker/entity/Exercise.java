@@ -25,4 +25,7 @@ public class Exercise {
     @Column(nullable = false)
     private MuscleGroup muscleGroup;
 
+    @Enumerated(EnumType.STRING)
+    private Equipment equipment;
+
 }
