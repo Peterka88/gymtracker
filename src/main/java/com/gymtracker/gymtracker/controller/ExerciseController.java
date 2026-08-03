@@ -2,6 +2,7 @@ package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.common.PageResponse;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
+import com.gymtracker.gymtracker.dto.exercise.ExerciseInfoDTO;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
 import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
 import com.gymtracker.gymtracker.entity.Exercise;
@@ -54,6 +55,10 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseService.getAll(size, page, search, muscleGroups));
     }
 
+    @GetMapping("/info")
+    public ResponseEntity<ExerciseInfoDTO> getInfo() {
+        return ResponseEntity.ok(ExerciseInfoDTO.create(exerciseService.countExercises()));
+    }
 
     @Operation(summary = "Get all exercises for workout")
     @ApiResponse(responseCode = "200", description = "Page of exercises")

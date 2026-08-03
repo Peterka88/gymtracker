@@ -94,4 +94,7 @@ public class ExerciseService {
         exerciseRepository.deleteById(id);
     }
 
+    public Integer countExercises() {
+        return (int) exerciseRepository.count();
+    }
 }
