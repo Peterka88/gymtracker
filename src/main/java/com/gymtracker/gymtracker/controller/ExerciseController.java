@@ -70,6 +70,13 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseService.getAllForWorkout(size, page));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Exercise> update(
+            @Parameter(description = "Exercise ID") @PathVariable Long id,
+            @RequestBody @Valid ExerciseDTO dto) {
+        return ResponseEntity.ok(exerciseService.updateExercise(id, dto));
+    }
+
     @Operation(summary = "Delete an exercise by ID")
     @ApiResponse(responseCode = "204", description = "Exercise deleted")
     @ApiResponse(responseCode = "404", description = "Exercise not found",

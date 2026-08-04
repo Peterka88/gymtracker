@@ -8,6 +8,7 @@ import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.repository.ExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -96,5 +97,19 @@ public class ExerciseService {
 
     public Integer countExercises() {
         return (int) exerciseRepository.count();
+    }
+
+    public Exercise updateExercise(Long id, @Valid ExerciseDTO dto) {
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Exercise not found"));
+
+        if (exerciseRepository.findByName(dto.name()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exercise with this name already exists");
+        }
+
+        exercise.setName(dto.name());
+        exercise.setMuscleGroup(dto.muscleGroup());
+        exercise.setEquipment(dto.equipment());
+
+        return exerciseRepository.save(exercise);
     }
 }
