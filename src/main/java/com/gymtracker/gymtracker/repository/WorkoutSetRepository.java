@@ -29,4 +29,12 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
                     ORDER BY session_exercises.exercise_id, workout_sessions.started_at DESC
                     """)
     List<LastPerformedProjection> findLastPerformedByExercise(@Param("exerciseIds") List<Long> exerciseIds);
+
+    @Query("""
+        SELECT ws FROM WorkoutSet ws
+        JOIN FETCH ws.sessionExercise se
+        JOIN FETCH se.session
+        WHERE ws.sessionExercise.exercise.id = :exerciseId AND ws.sessionExercise.session.appUser.id = :userId
+        """)
+    List<WorkoutSet> findAllForExerciseAndAppUser(@Param("exerciseId") Long exerciseId, @Param("userId") Long userId);
 }

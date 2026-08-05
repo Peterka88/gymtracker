@@ -1,11 +1,10 @@
 package com.gymtracker.gymtracker.service;
 
 import com.gymtracker.gymtracker.dto.common.PageResponse;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
+import com.gymtracker.gymtracker.dto.exercise.*;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.entity.MuscleGroup;
+import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.ExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import jakarta.validation.Valid;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -112,4 +112,58 @@ public class ExerciseService {
 
         return exerciseRepository.save(exercise);
     }
+
+    public ExerciseStatsDTO getExerciseStats(Long id, Long userId) {
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Exercise not found"));
+
+        List<WorkoutSet> sets = workoutSetRepository.findAllForExerciseAndAppUser(id, userId);
+
+        Double pr = sets.stream()
+                .max(Comparator.comparing(WorkoutSet::getWeight))
+                .map(WorkoutSet::getWeight).orElse(null);
+
+        Map<Long, List<WorkoutSet>> sessionSets = sets.stream()
+                .collect(Collectors.groupingBy(set -> set.getSessionExercise().getSession().getId()));
+
+        List<ProgressData> progressData = sessionSets.values().stream()
+                .map(ws -> {
+                    WorkoutSet topSet = ws.stream()
+                            .max(Comparator.comparing(WorkoutSet::getWeight))
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No sets found for session"));
+
+                    double volume = ws.stream()
+                            .mapToDouble(s -> s.getWeight() * s.getReps())
+                            .sum();
+
+                    return ProgressData.create(
+                            topSet.getSessionExercise().getSession().getStartedAt().toLocalDate(),
+                            topSet.getWeight(),
+                            volume,
+                            estimated1RM(topSet)
+                    );
+                }).toList();
+
+
+        return ExerciseStatsDTO.create(
+                exercise.getId(),
+                exercise.getName(),
+                pr,
+                sets.stream()
+                    .max(Comparator.comparing((WorkoutSet s) -> s.getSessionExercise().getSession().getStartedAt())
+                            .thenComparing(WorkoutSet::getWeight))
+                    .map(WorkoutSet::getWeight)
+                    .orElse(null),
+                sessionSets.size(),
+                progressData
+        );
+    }
+
+    private Double estimated1RM(WorkoutSet topSet) {
+        if (topSet.getReps() == null || topSet.getWeight() == null) {
+            return null;
+        }
+        // Epley formula: 1RM = weight * (1 + reps / 30)
+        return topSet.getWeight() * (1 + topSet.getReps() / 30.0);
+    }
+
 }
