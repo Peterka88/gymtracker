@@ -37,4 +37,11 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
         WHERE ws.sessionExercise.exercise.id = :exerciseId AND ws.sessionExercise.session.appUser.id = :userId
         """)
     List<WorkoutSet> findAllForExerciseAndAppUser(@Param("exerciseId") Long exerciseId, @Param("userId") Long userId);
+
+    @Query("""
+    SELECT ws FROM WorkoutSet ws
+    JOIN FETCH ws.sessionExercise se
+    WHERE se.exercise.id = :exerciseId AND se.session.id IN :sessionIds
+    """)
+    List<WorkoutSet> findAllBySessionIds(@Param("exerciseId") Long exerciseId, @Param("sessionIds") List<Long> sessionIds);
 }

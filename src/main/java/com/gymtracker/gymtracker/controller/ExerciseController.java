@@ -1,11 +1,7 @@
 package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.common.PageResponse;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseInfoDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseStatsDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
+import com.gymtracker.gymtracker.dto.exercise.*;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.security.AppUserPrincipal;
@@ -44,7 +40,7 @@ public class ExerciseController {
                             }"""
             )))
     @PostMapping
-    public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseDTO dto) {
+    public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseCreateReqDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
     }
 
@@ -66,6 +62,16 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseService.getExerciseStats(id, principal.getId()));
     }
 
+    @GetMapping("/{id}/history")
+    public ResponseEntity<PageResponse<ExerciseHistoryDTO>> getExerciseHistory(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "5") Integer size,
+            @RequestParam(defaultValue = "0") Integer page,
+            @AuthenticationPrincipal AppUserPrincipal principal
+    ) {
+        return ResponseEntity.ok(exerciseService.getExerciseHistory(id, principal.getId(), size, page));
+    }
+
     @GetMapping("/info")
     public ResponseEntity<ExerciseInfoDTO> getInfo() {
         return ResponseEntity.ok(ExerciseInfoDTO.create(exerciseService.countExercises()));
@@ -84,7 +90,7 @@ public class ExerciseController {
     @PutMapping("/{id}")
     public ResponseEntity<Exercise> update(
             @Parameter(description = "Exercise ID") @PathVariable Long id,
-            @RequestBody @Valid ExerciseDTO dto) {
+            @RequestBody @Valid ExerciseCreateReqDTO dto) {
         return ResponseEntity.ok(exerciseService.updateExercise(id, dto));
     }
 
