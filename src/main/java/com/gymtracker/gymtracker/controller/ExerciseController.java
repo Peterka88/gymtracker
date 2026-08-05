@@ -1,11 +1,10 @@
 package com.gymtracker.gymtracker.controller;
 
 import com.gymtracker.gymtracker.dto.common.PageResponse;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseListResponseDTO;
-import com.gymtracker.gymtracker.dto.exercise.ExerciseWorkoutAddResponseDTO;
+import com.gymtracker.gymtracker.dto.exercise.*;
 import com.gymtracker.gymtracker.entity.Exercise;
 import com.gymtracker.gymtracker.entity.MuscleGroup;
+import com.gymtracker.gymtracker.security.AppUserPrincipal;
 import com.gymtracker.gymtracker.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class ExerciseController {
                             }"""
             )))
     @PostMapping
-    public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseDTO dto) {
+    public ResponseEntity<Exercise> create(@RequestBody @Valid ExerciseCreateReqDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
     }
 
@@ -54,6 +54,28 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseService.getAll(size, page, search, muscleGroups));
     }
 
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<ExerciseStatsDTO> getExerciseStats(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUserPrincipal principal
+    ) {
+        return ResponseEntity.ok(exerciseService.getExerciseStats(id, principal.getId()));
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<PageResponse<ExerciseHistoryDTO>> getExerciseHistory(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "5") Integer size,
+            @RequestParam(defaultValue = "0") Integer page,
+            @AuthenticationPrincipal AppUserPrincipal principal
+    ) {
+        return ResponseEntity.ok(exerciseService.getExerciseHistory(id, principal.getId(), size, page));
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<ExerciseInfoDTO> getInfo() {
+        return ResponseEntity.ok(ExerciseInfoDTO.create(exerciseService.countExercises()));
+    }
 
     @Operation(summary = "Get all exercises for workout")
     @ApiResponse(responseCode = "200", description = "Page of exercises")
@@ -63,6 +85,13 @@ public class ExerciseController {
             @RequestParam(defaultValue = "0") Integer page
     ) {
         return ResponseEntity.ok(exerciseService.getAllForWorkout(size, page));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Exercise> update(
+            @Parameter(description = "Exercise ID") @PathVariable Long id,
+            @RequestBody @Valid ExerciseCreateReqDTO dto) {
+        return ResponseEntity.ok(exerciseService.updateExercise(id, dto));
     }
 
     @Operation(summary = "Delete an exercise by ID")
