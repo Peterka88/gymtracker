@@ -7,6 +7,7 @@ import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.ExerciseRepository;
+import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -33,6 +35,7 @@ public class ExerciseService {
     private final ExerciseRepository exerciseRepository;
     private final WorkoutSetRepository workoutSetRepository;
     private final WorkoutSessionRepository workoutSessionRepository;
+    private final SessionExerciseRepository sessionExerciseRepository;
     private final PersonalRecordsService personalRecordsService;
 
     public PageResponse<ExerciseListResponseDTO> getAll(Integer size, Integer page, String search, List<MuscleGroup> muscleGroupList) {
@@ -97,7 +100,14 @@ public class ExerciseService {
         return exerciseRepository.save(exercise);
     }
 
+    @Transactional
     public void deleteExercise(Long id) {
+        if (!exerciseRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Exercise not found");
+        }
+
+        sessionExerciseRepository.deleteByExerciseId(id);
+
         exerciseRepository.deleteById(id);
     }
 
