@@ -157,12 +157,14 @@ public class ExerciseService {
                             volume,
                             estimated1RM(topSet)
                     );
-                }).toList();
+                }).sorted(Comparator.comparing(ProgressData::date)).toList();
 
 
         return ExerciseStatsDTO.create(
                 exercise.getId(),
                 exercise.getName(),
+                exercise.getMuscleGroup(),
+                exercise.getEquipment(),
                 pr,
                 sets.stream()
                     .max(Comparator.comparing((WorkoutSet s) -> s.getSessionExercise().getSession().getStartedAt())
