@@ -21,4 +21,6 @@ public interface SessionExerciseRepository extends JpaRepository<SessionExercise
     List<Object[]> countBySessionIds(@Param("sessionIds") List<Long> sessionIds);
 
     Integer countSessionExerciseBySessionId(Long sessionId);
+
+    void deleteByExerciseId(Long exerciseId);
 }

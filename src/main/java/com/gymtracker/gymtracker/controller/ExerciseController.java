@@ -77,6 +77,11 @@ public class ExerciseController {
         return ResponseEntity.ok(ExerciseInfoDTO.create(exerciseService.countExercises()));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Exercise> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(exerciseService.getExerciseById(id));
+    }
+
     @Operation(summary = "Get all exercises for workout")
     @ApiResponse(responseCode = "200", description = "Page of exercises")
     @GetMapping("/workout")
