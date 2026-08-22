@@ -41,7 +41,7 @@ class WorkoutSetRepositoryIT {
     private WorkoutSetRepository workoutSetRepository;
 
     @Test
-    void findLastPerformedByExercise_returnsOnlyMostRecentSetPerExercise() {
+    void findWeightHistoryByExercise_returnsMostRecentSetsFirst() {
         AppUser user = appUserRepository.save(AppUser.builder().username("tester").build());
         Exercise benchPress = exerciseRepository.save(
                 Exercise.builder().name("Bench Press").muscleGroup(MuscleGroup.CHEST).build());
@@ -49,17 +49,18 @@ class WorkoutSetRepositoryIT {
         saveSessionWithSet(user, benchPress, LocalDateTime.of(2026, 7, 1, 10, 0), 60.0);
         saveSessionWithSet(user, benchPress, LocalDateTime.of(2026, 7, 10, 10, 0), 70.0);
 
-        List<WorkoutSetRepository.LastPerformedProjection> result =
-                workoutSetRepository.findLastPerformedByExercise(List.of(benchPress.getId()));
+        List<WorkoutSetRepository.ExerciseWeightHistoryProjection> result =
+                workoutSetRepository.findWeightHistoryByExercise(List.of(benchPress.getId()));
 
-        assertThat(result).hasSize(1);
+        assertThat(result).hasSize(2);
         assertThat(result.getFirst().getExerciseId()).isEqualTo(benchPress.getId());
-        assertThat(result.getFirst().getLastWeight()).isEqualTo(70.0);
+        assertThat(result.getFirst().getWeight()).isEqualTo(70.0);
         assertThat(result.getFirst().getLastDate()).isEqualTo(LocalDateTime.of(2026, 7, 10, 10, 0));
+        assertThat(result.getLast().getWeight()).isEqualTo(60.0);
     }
 
     @Test
-    void findLastPerformedByExercise_returnsOneRowPerExercise_whenMultipleExercisesRequested() {
+    void findWeightHistoryByExercise_returnsRowsPerExercise_whenMultipleExercisesRequested() {
         AppUser user = appUserRepository.save(AppUser.builder().username("tester2").build());
         Exercise benchPress = exerciseRepository.save(
                 Exercise.builder().name("Bench Press").muscleGroup(MuscleGroup.CHEST).build());
@@ -71,13 +72,31 @@ class WorkoutSetRepositoryIT {
         saveSessionWithSet(user, squat, LocalDateTime.of(2026, 7, 2, 10, 0), 100.0);
         saveSessionWithSet(user, squat, LocalDateTime.of(2026, 7, 11, 10, 0), 110.0);
 
-        List<WorkoutSetRepository.LastPerformedProjection> result = workoutSetRepository
-                .findLastPerformedByExercise(List.of(benchPress.getId(), squat.getId()));
+        List<WorkoutSetRepository.ExerciseWeightHistoryProjection> result = workoutSetRepository
+                .findWeightHistoryByExercise(List.of(benchPress.getId(), squat.getId()));
 
-        assertThat(result).hasSize(2);
+        assertThat(result).hasSize(4);
         assertThat(result)
-                .extracting(WorkoutSetRepository.LastPerformedProjection::getExerciseId)
-                .containsExactlyInAnyOrder(benchPress.getId(), squat.getId());
+                .extracting(WorkoutSetRepository.ExerciseWeightHistoryProjection::getExerciseId)
+                .containsExactlyInAnyOrder(benchPress.getId(), benchPress.getId(), squat.getId(), squat.getId());
+    }
+
+    @Test
+    void findWeightHistoryByExercise_capsAt20MostRecentSets() {
+        AppUser user = appUserRepository.save(AppUser.builder().username("tester3").build());
+        Exercise benchPress = exerciseRepository.save(
+                Exercise.builder().name("Bench Press").muscleGroup(MuscleGroup.CHEST).build());
+
+        for (int i = 1; i <= 25; i++) {
+            saveSessionWithSet(user, benchPress, LocalDateTime.of(2026, 1, i, 10, 0), 50.0 + i);
+        }
+
+        List<WorkoutSetRepository.ExerciseWeightHistoryProjection> result =
+                workoutSetRepository.findWeightHistoryByExercise(List.of(benchPress.getId()));
+
+        assertThat(result).hasSize(20);
+        assertThat(result.getFirst().getWeight()).isEqualTo(75.0);
+        assertThat(result.getLast().getWeight()).isEqualTo(56.0);
     }
 
     private void saveSessionWithSet(AppUser user, Exercise exercise, LocalDateTime startedAt, double weight) {

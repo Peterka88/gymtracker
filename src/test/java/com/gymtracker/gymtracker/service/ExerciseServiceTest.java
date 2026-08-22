@@ -217,8 +217,8 @@ class ExerciseServiceTest {
         when(exerciseRepository.search(isNull(), isNull(), any())).thenReturn(page);
 
         LocalDateTime lastDate = LocalDateTime.of(2026, 7, 1, 10, 0);
-        WorkoutSetRepository.LastPerformedProjection projection = mockProjection(1L, lastDate, 120.0);
-        when(workoutSetRepository.findLastPerformedByExercise(List.of(1L))).thenReturn(List.of(projection));
+        WorkoutSetRepository.ExerciseWeightHistoryProjection projection = mockHistoryProjection(1L, lastDate, 120.0);
+        when(workoutSetRepository.findWeightHistoryByExercise(List.of(1L))).thenReturn(List.of(projection));
 
         PageResponse<ExerciseListResponseDTO> result = exerciseService.getAll(10, 0, null, null);
 
@@ -226,6 +226,7 @@ class ExerciseServiceTest {
         ExerciseListResponseDTO dto = result.content().getFirst();
         assertThat(dto.lastDate()).isEqualTo(lastDate.toLocalDate());
         assertThat(dto.lastWeight()).isEqualTo(120.0);
+        assertThat(dto.lastWeights()).containsExactly(120.0);
     }
 
     @Test
@@ -233,13 +234,14 @@ class ExerciseServiceTest {
         Exercise ex = exercise(1L, "Deadlift");
         Page<Exercise> page = new PageImpl<>(List.of(ex));
         when(exerciseRepository.search(isNull(), isNull(), any())).thenReturn(page);
-        when(workoutSetRepository.findLastPerformedByExercise(List.of(1L))).thenReturn(List.of());
+        when(workoutSetRepository.findWeightHistoryByExercise(List.of(1L))).thenReturn(List.of());
 
         PageResponse<ExerciseListResponseDTO> result = exerciseService.getAll(10, 0, null, null);
 
         ExerciseListResponseDTO dto = result.content().getFirst();
         assertThat(dto.lastDate()).isNull();
         assertThat(dto.lastWeight()).isNull();
+        assertThat(dto.lastWeights()).isEmpty();
     }
 
     @Test
@@ -249,7 +251,7 @@ class ExerciseServiceTest {
         PageResponse<ExerciseListResponseDTO> result = exerciseService.getAll(10, 0, null, null);
 
         assertThat(result.content()).isEmpty();
-        verify(workoutSetRepository, never()).findLastPerformedByExercise(anyList());
+        verify(workoutSetRepository, never()).findWeightHistoryByExercise(anyList());
     }
 
     @Test
@@ -390,11 +392,11 @@ class ExerciseServiceTest {
         assertThat(result.totalElements()).isZero();
     }
 
-    private WorkoutSetRepository.LastPerformedProjection mockProjection(Long exerciseId, LocalDateTime lastDate, Double lastWeight) {
-        WorkoutSetRepository.LastPerformedProjection projection = org.mockito.Mockito.mock(WorkoutSetRepository.LastPerformedProjection.class);
+    private WorkoutSetRepository.ExerciseWeightHistoryProjection mockHistoryProjection(Long exerciseId, LocalDateTime lastDate, Double weight) {
+        WorkoutSetRepository.ExerciseWeightHistoryProjection projection = org.mockito.Mockito.mock(WorkoutSetRepository.ExerciseWeightHistoryProjection.class);
         when(projection.getExerciseId()).thenReturn(exerciseId);
         when(projection.getLastDate()).thenReturn(lastDate);
-        when(projection.getLastWeight()).thenReturn(lastWeight);
+        when(projection.getWeight()).thenReturn(weight);
         return projection;
     }
 }

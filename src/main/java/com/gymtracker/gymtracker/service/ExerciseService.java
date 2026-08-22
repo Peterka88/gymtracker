@@ -50,24 +50,27 @@ public class ExerciseService {
                 ? exerciseRepository.search(searchPattern, null, pageable)
                 : exerciseRepository.search(searchPattern, muscleGroupList, pageable);
         List<Long> ids = exercises.stream().map((Exercise::getId)).toList();
-        Map<Long, WorkoutSetRepository.LastPerformedProjection> lastPerformedProjectionMap;
+        Map<Long, List<WorkoutSetRepository.ExerciseWeightHistoryProjection>> weightHistoryMap;
 
         if (!ids.isEmpty()) {
-            lastPerformedProjectionMap = workoutSetRepository.findLastPerformedByExercise(ids).stream()
-                    .collect(Collectors.toMap(WorkoutSetRepository.LastPerformedProjection::getExerciseId, exercise -> exercise));
+            weightHistoryMap = workoutSetRepository.findWeightHistoryByExercise(ids).stream()
+                    .collect(Collectors.groupingBy(WorkoutSetRepository.ExerciseWeightHistoryProjection::getExerciseId));
         } else {
-            lastPerformedProjectionMap = Map.of();
+            weightHistoryMap = Map.of();
         }
 
         Page<ExerciseListResponseDTO> result = exercises
                 .map(exercise -> {
-                    var projection = lastPerformedProjectionMap.get(exercise.getId());
-                    if (projection == null){
-                        return ExerciseListResponseDTO.from(exercise, null, null);
+                    List<WorkoutSetRepository.ExerciseWeightHistoryProjection> history =
+                            weightHistoryMap.getOrDefault(exercise.getId(), List.of());
+                    if (history.isEmpty()) {
+                        return ExerciseListResponseDTO.from(exercise, null, null, List.of());
                     }
-                    LocalDateTime lastDate = projection.getLastDate();
-                    Double lastWeight = projection.getLastWeight();
-                    return ExerciseListResponseDTO.from(exercise, lastDate.toLocalDate(), lastWeight);
+                    var latest = history.get(0);
+                    List<Double> lastWeights = history.stream()
+                            .map(WorkoutSetRepository.ExerciseWeightHistoryProjection::getWeight)
+                            .toList();
+                    return ExerciseListResponseDTO.from(exercise, latest.getLastDate().toLocalDate(), latest.getWeight(), lastWeights);
                 });
 
         return PageResponse.from(result);
