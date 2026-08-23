@@ -41,14 +41,7 @@ public class ExerciseService {
     public PageResponse<ExerciseListResponseDTO> getAll(Integer size, Integer page, String search, List<MuscleGroup> muscleGroupList) {
         Pageable pageable = PageRequest.of(page, size);
 
-        String searchPattern = (search == null || search.isBlank())
-                ? null
-                : "%" + search.toLowerCase() + "%";
-
-        Page<Exercise> exercises;
-        exercises = (muscleGroupList == null || muscleGroupList.isEmpty())
-                ? exerciseRepository.search(searchPattern, null, pageable)
-                : exerciseRepository.search(searchPattern, muscleGroupList, pageable);
+        Page<Exercise> exercises = getExercisesByFilters(search, muscleGroupList, pageable);
         List<Long> ids = exercises.stream().map((Exercise::getId)).toList();
         Map<Long, List<WorkoutSetRepository.ExerciseWeightHistoryProjection>> weightHistoryMap;
 
@@ -76,13 +69,13 @@ public class ExerciseService {
         return PageResponse.from(result);
     }
 
-    public PageResponse<ExerciseWorkoutAddResponseDTO> getAllForWorkout(Integer size, Integer page) {
+    public PageResponse<ExerciseWorkoutAddResponseDTO> getAllForWorkout(Integer size, Integer page, String search, List<MuscleGroup> muscleGroups) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ExerciseWorkoutAddResponseDTO> result = exerciseRepository.findAll(pageable)
+        Page<ExerciseWorkoutAddResponseDTO> exercises = getExercisesByFilters(search, muscleGroups, pageable)
                 .map(ExerciseWorkoutAddResponseDTO::from);
 
-        return PageResponse.from(result);
+        return PageResponse.from(exercises);
     }
 
     public Exercise getExerciseById(Long id) {
@@ -218,5 +211,18 @@ public class ExerciseService {
                 .toList();
 
         return PageResponse.from(new PageImpl<>(historyDTOs, pageable, workoutSessions.getTotalElements()));
+    }
+
+    private Page<Exercise> getExercisesByFilters(String search, List<MuscleGroup> muscleGroupList, Pageable pageable){
+        String searchPattern = (search == null || search.isBlank())
+                ? null
+                : "%" + search.toLowerCase() + "%";
+
+        Page<Exercise> exercises;
+        exercises = (muscleGroupList == null || muscleGroupList.isEmpty())
+                ? exerciseRepository.search(searchPattern, null, pageable)
+                : exerciseRepository.search(searchPattern, muscleGroupList, pageable);
+
+        return exercises;
     }
 }

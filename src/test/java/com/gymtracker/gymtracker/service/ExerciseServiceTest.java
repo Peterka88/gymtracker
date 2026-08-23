@@ -276,12 +276,50 @@ class ExerciseServiceTest {
     @Test
     void getAllForWorkout_mapsPageToWorkoutAddResponse() {
         Exercise ex = exercise(2L, "Pull Up");
-        when(exerciseRepository.findAll(PageRequest.of(0, 10))).thenReturn(new PageImpl<>(List.of(ex)));
+        when(exerciseRepository.search(isNull(), isNull(), eq(PageRequest.of(0, 10))))
+                .thenReturn(new PageImpl<>(List.of(ex)));
 
-        PageResponse<ExerciseWorkoutAddResponseDTO> result = exerciseService.getAllForWorkout(10, 0);
+        PageResponse<ExerciseWorkoutAddResponseDTO> result = exerciseService.getAllForWorkout(10, 0, null, null);
 
         assertThat(result.content()).hasSize(1);
         assertThat(result.content().getFirst().name()).isEqualTo("Pull Up");
+    }
+
+    @Test
+    void getAllForWorkout_buildsLowercaseSearchPattern_andPassesMuscleGroups() {
+        when(exerciseRepository.search(eq("%pull%"), eq(List.of(MuscleGroup.BACK)), any()))
+                .thenReturn(Page.empty());
+
+        exerciseService.getAllForWorkout(10, 0, "Pull", List.of(MuscleGroup.BACK));
+
+        verify(exerciseRepository, times(1)).search(eq("%pull%"), eq(List.of(MuscleGroup.BACK)), any());
+    }
+
+    @Test
+    void getAllForWorkout_passesNullSearch_whenSearchIsBlank() {
+        when(exerciseRepository.search(isNull(), isNull(), any())).thenReturn(Page.empty());
+
+        exerciseService.getAllForWorkout(10, 0, "   ", List.of());
+
+        verify(exerciseRepository).search(isNull(), isNull(), any());
+    }
+
+    @Test
+    void getAllForWorkout_passesNullMuscleGroups_whenMuscleGroupListIsNull() {
+        when(exerciseRepository.search(eq("%pull%"), isNull(), any())).thenReturn(Page.empty());
+
+        exerciseService.getAllForWorkout(10, 0, "Pull", null);
+
+        verify(exerciseRepository).search(eq("%pull%"), isNull(), any());
+    }
+
+    @Test
+    void getAllForWorkout_returnsEmptyPage_whenNoExercisesMatch() {
+        when(exerciseRepository.search(isNull(), isNull(), any())).thenReturn(Page.empty());
+
+        PageResponse<ExerciseWorkoutAddResponseDTO> result = exerciseService.getAllForWorkout(10, 0, null, null);
+
+        assertThat(result.content()).isEmpty();
     }
 
     @Test

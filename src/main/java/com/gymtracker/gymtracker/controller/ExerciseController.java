@@ -86,10 +86,12 @@ public class ExerciseController {
     @ApiResponse(responseCode = "200", description = "Page of exercises")
     @GetMapping("/workout")
     public ResponseEntity<PageResponse<ExerciseWorkoutAddResponseDTO>> getAllForWorkout(
+            @RequestParam(required = false)String search,
+            @RequestParam(required = false)List<MuscleGroup> muscleGroups,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "0") Integer page
     ) {
-        return ResponseEntity.ok(exerciseService.getAllForWorkout(size, page));
+        return ResponseEntity.ok(exerciseService.getAllForWorkout(size, page, search, muscleGroups));
     }
 
     @PutMapping("/{id}")
