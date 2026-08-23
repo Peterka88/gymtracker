@@ -20,6 +20,7 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
         SELECT e FROM Exercise e
         WHERE (:search IS NULL OR LOWER(e.name) LIKE :search)
               AND (:muscleGroups IS NULL OR e.muscleGroup IN :muscleGroups)
+        ORDER BY e.id
         """)
     Page<Exercise> search(@Param("search") String name, @Param("muscleGroups") List<MuscleGroup> muscleGroupList, Pageable pageable);
 }

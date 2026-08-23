@@ -13,20 +13,20 @@ public record SessionExerciseResponse(
         String exerciseName,
         Integer orderIndex,
         String note,
+        Double lastWeight,
+        Integer lastReps,
         List<WorkoutSetResponse> workoutSets
 ) {
 
-    public static SessionExerciseResponse from(SessionExercise sessionExercise) {
-        return from(sessionExercise, Set.of());
-    }
-
-    public static SessionExerciseResponse from(SessionExercise sessionExercise, Set<Long> prWorkoutSetIds) {
+    public static SessionExerciseResponse from(SessionExercise sessionExercise, Set<Long> prWorkoutSetIds, Double lastWeight, Integer lastReps) {
         return new SessionExerciseResponse(
                 sessionExercise.getId(),
                 sessionExercise.getExercise().getId(),
                 sessionExercise.getExercise().getName(),
                 sessionExercise.getOrderIndex(),
                 sessionExercise.getNote(),
+                lastWeight,
+                lastReps,
                 sessionExercise.getWorkoutSets().stream()
                         .map(set -> WorkoutSetResponse.from(set, prWorkoutSetIds))
                         .collect(Collectors.toList())
