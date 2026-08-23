@@ -17,6 +17,7 @@ import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.entity.WorkoutSet;
 import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
+import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -54,6 +55,8 @@ public class WorkoutSessionServiceTest {
     private PersonalRecordsService personalRecordsService;
     @Mock
     private ExerciseService exerciseService;
+    @Mock
+    private WorkoutSetRepository workoutSetRepository;
 
     @InjectMocks
     private WorkoutSessionService workoutSessionService;
@@ -86,6 +89,15 @@ public class WorkoutSessionServiceTest {
 
     private Exercise exercise(Long id, String name) {
         return Exercise.builder().id(id).name(name).muscleGroup(MuscleGroup.CHEST).build();
+    }
+
+    private WorkoutSetRepository.ExerciseLastWeightRepsProjection mockLastWeightRepsProjection(Long exerciseId, Double weight, Integer reps) {
+        WorkoutSetRepository.ExerciseLastWeightRepsProjection projection =
+                org.mockito.Mockito.mock(WorkoutSetRepository.ExerciseLastWeightRepsProjection.class);
+        when(projection.getExerciseId()).thenReturn(exerciseId);
+        when(projection.getWeight()).thenReturn(weight);
+        when(projection.getReps()).thenReturn(reps);
+        return projection;
     }
 
     @Test
@@ -300,6 +312,67 @@ public class WorkoutSessionServiceTest {
 
         assertThat(result.pr()).isFalse();
         assertThat(result.sessionExercises()).isEmpty();
+    }
+
+    @Test
+    void getWorkoutSessionDetail_setsLastWeightAndReps_whenPreviousSessionExists() {
+        WorkoutSession fullSession = session(1L, "Push Day");
+        when(workoutSessionRepository.findByAppUserIdAndId(99L, 1L))
+                .thenReturn(Optional.of(fullSession));
+
+        Exercise benchPress = exercise(5L, "Bench Press");
+        SessionExercise sessionExercise = SessionExercise.builder()
+                .id(10L)
+                .session(fullSession)
+                .exercise(benchPress)
+                .orderIndex(0)
+                .build();
+
+        when(sessionExerciseRepository.findAllBySessionIdWithSetsOrderByOrderIndexAsc(1L))
+                .thenReturn(List.of(sessionExercise));
+        when(personalRecordsService.getPrWorkoutSetIds(99L, 1L))
+                .thenReturn(Set.of());
+        when(sessionExerciseRepository.findLastSessionsByExerciseIds(List.of(5L), 1L))
+                .thenReturn(List.of(50L));
+        WorkoutSetRepository.ExerciseLastWeightRepsProjection projection = mockLastWeightRepsProjection(5L, 80.0, 8);
+        when(workoutSetRepository.findLastWeightAndRepsByExercise(List.of(50L)))
+                .thenReturn(List.of(projection));
+
+        WorkoutSessionDetailResponse result = workoutSessionService.getWorkoutSessionDetail(99L, 1L);
+
+        assertThat(result.sessionExercises()).hasSize(1);
+        assertThat(result.sessionExercises().getFirst().lastWeight()).isEqualTo(80.0);
+        assertThat(result.sessionExercises().getFirst().lastReps()).isEqualTo(8);
+    }
+
+    @Test
+    void getWorkoutSessionDetail_leavesLastWeightAndRepsNull_whenNoPreviousSessionExists() {
+        WorkoutSession fullSession = session(1L, "Push Day");
+        when(workoutSessionRepository.findByAppUserIdAndId(99L, 1L))
+                .thenReturn(Optional.of(fullSession));
+
+        Exercise benchPress = exercise(5L, "Bench Press");
+        SessionExercise sessionExercise = SessionExercise.builder()
+                .id(10L)
+                .session(fullSession)
+                .exercise(benchPress)
+                .orderIndex(0)
+                .build();
+
+        when(sessionExerciseRepository.findAllBySessionIdWithSetsOrderByOrderIndexAsc(1L))
+                .thenReturn(List.of(sessionExercise));
+        when(personalRecordsService.getPrWorkoutSetIds(99L, 1L))
+                .thenReturn(Set.of());
+        when(sessionExerciseRepository.findLastSessionsByExerciseIds(List.of(5L), 1L))
+                .thenReturn(List.of());
+        when(workoutSetRepository.findLastWeightAndRepsByExercise(List.of()))
+                .thenReturn(List.of());
+
+        WorkoutSessionDetailResponse result = workoutSessionService.getWorkoutSessionDetail(99L, 1L);
+
+        assertThat(result.sessionExercises()).hasSize(1);
+        assertThat(result.sessionExercises().getFirst().lastWeight()).isNull();
+        assertThat(result.sessionExercises().getFirst().lastReps()).isNull();
     }
 
     @Test

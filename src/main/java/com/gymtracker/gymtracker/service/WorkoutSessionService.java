@@ -11,6 +11,7 @@ import com.gymtracker.gymtracker.entity.SessionExercise;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
+import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class WorkoutSessionService {
     private final AppUserService appUserService;
     private final PersonalRecordsService personalRecordsService;
     private final ExerciseService exerciseService;
+    private final WorkoutSetRepository workoutSetRepository;
 
     public List<WorkoutSessionResponse> getWorkoutSessions(Long userId, Integer paramSize, Integer page) {
         int size = (paramSize == null || paramSize == 0) ? DEFAULT_PAGE_SIZE : paramSize;
@@ -60,7 +62,11 @@ public class WorkoutSessionService {
 
     public WorkoutSessionDetailResponse getWorkoutSessionDetail(Long userId, Long id) {
         WorkoutSession session = getWorkoutSessionById(userId, id);
+
         List<SessionExercise> sessionExerciseList = sessionExerciseRepository.findAllBySessionIdWithSetsOrderByOrderIndexAsc(id);
+        List<Long> exerciseIds = sessionExerciseList.stream().map(se -> se.getExercise().getId()).toList();
+        List<Long> lastSessionExercises = sessionExerciseRepository.findLastSessionsByExerciseIds(exerciseIds, id);
+        List<WorkoutSetRepository.ExerciseLastWeightRepsProjection> lastWeightRepsProjections = workoutSetRepository.findLastWeightAndRepsByExercise(lastSessionExercises);
         Set<Long> prWorkoutSetIds = personalRecordsService.getPrWorkoutSetIds(userId, id);
 
         return new WorkoutSessionDetailResponse(
@@ -72,7 +78,16 @@ public class WorkoutSessionService {
                 session.getNote(),
                 !prWorkoutSetIds.isEmpty(),
                 sessionExerciseList.stream()
-                        .map(se -> SessionExerciseResponse.from(se, prWorkoutSetIds))
+                        .map(se -> {
+                            WorkoutSetRepository.ExerciseLastWeightRepsProjection lastWeightReps = lastWeightRepsProjections.stream()
+                                    .filter(p -> p.getExerciseId().equals(se.getExercise().getId()))
+                                    .findFirst()
+                                    .orElse(null);
+
+                            Double lastWeight = lastWeightReps != null ? lastWeightReps.getWeight() : null;
+                            Integer lastReps = lastWeightReps != null ? lastWeightReps.getReps() : null;
+                            return SessionExerciseResponse.from(se, prWorkoutSetIds, lastWeight, lastReps);
+                        })
                         .collect(Collectors.toList())
         );
     }

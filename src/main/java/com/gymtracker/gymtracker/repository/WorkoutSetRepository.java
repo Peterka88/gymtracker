@@ -16,6 +16,12 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
         Double getWeight();
     }
 
+    interface ExerciseLastWeightRepsProjection {
+        Long getExerciseId();
+        Double getWeight();
+        Integer getReps();
+    }
+
     @Query(nativeQuery = true,
             value = """
                     SELECT exercise_id AS exerciseId, started_at AS lastDate, weight
@@ -33,9 +39,28 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
                         WHERE session_exercises.exercise_id IN (:exerciseIds)
                     ) ranked
                     WHERE rn <= 20
-                    ORDER BY exercise_id, rn 
+                    ORDER BY exercise_id, rn
                     """)
     List<ExerciseWeightHistoryProjection> findWeightHistoryByExercise(@Param("exerciseIds") List<Long> exerciseIds);
+
+    @Query(nativeQuery = true,
+        value = """
+                SELECT exercise_id AS exerciseId, weight, reps
+                FROM (
+                    SELECT session_exercises.exercise_id AS exercise_id,
+                           workout_sets.weight AS weight,
+                           workout_sets.reps AS reps,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY session_exercises.exercise_id
+                               ORDER BY workout_sets.weight DESC, workout_sets.reps DESC
+                           ) AS rn
+                    FROM workout_sets
+                    JOIN session_exercises ON session_exercises.id = workout_sets.session_exercise_id
+                    WHERE workout_sets.session_exercise_id IN (:exerciseSessionIds)
+                ) ranked
+                WHERE rn = 1
+                """)
+    List<ExerciseLastWeightRepsProjection> findLastWeightAndRepsByExercise(@Param("exerciseSessionIds") List<Long> exerciseSessionIds);
 
     @Query("""
         SELECT ws FROM WorkoutSet ws
