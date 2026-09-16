@@ -13,5 +13,6 @@ public record WorkoutSessionDetailResponse(
         Integer duration,
         String note,
         boolean pr,
+        LocationDTO location,
         List<SessionExerciseResponse> sessionExercises
 ) {}
