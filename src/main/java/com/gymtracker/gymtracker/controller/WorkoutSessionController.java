@@ -1,10 +1,9 @@
 package com.gymtracker.gymtracker.controller;
 
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.LocationPatchReqDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionFinishResDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionPatchResDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResDTO;
-import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.WorkoutSessionStartResult;
+import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.*;
+import com.gymtracker.gymtracker.dto.workoutSession.LocationDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
 import com.gymtracker.gymtracker.security.AppUserPrincipal;
@@ -96,6 +95,14 @@ public class WorkoutSessionController {
             @PathVariable Long id,
             @RequestBody @Valid WorkoutSessionPatchDTO dto) {
         return ResponseEntity.ok(workoutSessionService.updateWorkoutSessionNameOrNote(id, principal.getId(), dto));
+    }
+
+    @PatchMapping("/{id}/location")
+    public ResponseEntity<LocationDTO> updateLocation(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @PathVariable Long id,
+            @RequestBody @Valid LocationPatchReqDTO dto) {
+        return ResponseEntity.ok(workoutSessionService.updateWorkoutSessionLocation(id, principal.getId(), dto));
     }
 
     @Operation(summary = "Delete a workout session and all its sets")

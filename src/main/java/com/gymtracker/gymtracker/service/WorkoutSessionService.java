@@ -1,17 +1,21 @@
 package com.gymtracker.gymtracker.service;
 
+import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.LocationPatchReqDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseCreateDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseNoteDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.*;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
+import com.gymtracker.gymtracker.dto.workoutSession.LocationDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
+import com.gymtracker.gymtracker.entity.Location;
 import com.gymtracker.gymtracker.entity.SessionExercise;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSessionRepository;
 import com.gymtracker.gymtracker.repository.WorkoutSetRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +81,7 @@ public class WorkoutSessionService {
                 session.getDurationMinutes(),
                 session.getNote(),
                 !prWorkoutSetIds.isEmpty(),
+                session.getLocation() != null ? LocationDTO.from(session.getLocation()) : null,
                 sessionExerciseList.stream()
                         .map(se -> {
                             WorkoutSetRepository.ExerciseLastWeightRepsProjection lastWeightReps = lastWeightRepsProjections.stream()
@@ -179,5 +184,21 @@ public class WorkoutSessionService {
     @Transactional
     public void deleteSessionExercise(Long userId, Long id) {
         sessionExerciseRepository.deleteByIdAndSessionAppUserId(id, userId);
+    }
+
+    public LocationDTO updateWorkoutSessionLocation(Long sessionId, Long userId, @Valid LocationPatchReqDTO dto) {
+        WorkoutSession session = workoutSessionRepository.findByAppUserIdAndId(userId, sessionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
+
+        session.setLocation(
+                Location.builder()
+                        .locationName(dto.locationName())
+                        .address(dto.address())
+                        .latitude(dto.latitude())
+                        .longitude(dto.longitude())
+                        .build()
+                );
+
+        return LocationDTO.from(workoutSessionRepository.save(session).getLocation());
     }
 }

@@ -34,6 +34,9 @@ public class WorkoutSession {
 
     private String note;
 
+    @Embedded
+    private Location location;
+
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<SessionExercise> sessionExercises = new ArrayList<>();
