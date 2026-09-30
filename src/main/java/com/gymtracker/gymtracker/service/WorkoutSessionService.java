@@ -6,6 +6,7 @@ import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseN
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.*;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
+import com.gymtracker.gymtracker.dto.workoutSession.CalendarDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.LocationDTO;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
 import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
@@ -93,6 +94,27 @@ public class WorkoutSessionService {
                             Integer lastReps = lastWeightReps != null ? lastWeightReps.getReps() : null;
                             return SessionExerciseResponse.from(se, prWorkoutSetIds, lastWeight, lastReps);
                         })
+                        .collect(Collectors.toList())
+        );
+    }
+
+    public CalendarDTO getCalendarView(Long userId, Integer month, Integer year) {
+        LocalDateTime now = LocalDateTime.now();
+        int queryMonth = (month == null || month < 1 || month > 12) ? now.getMonthValue() : month;
+        int queryYear = (year == null || year < 2020 || year > 2100) ? now.getYear() : year;
+
+        List<WorkoutSessionRepository.WorkoutSessionDayProjection> sessions = workoutSessionRepository.findAllByAppUserIdAndMonthAndYear(userId, queryMonth, queryYear);
+        Set<Long> prSessionIds = personalRecordsService.getSessionIdsWithPr(userId);
+
+        return new CalendarDTO(
+                queryMonth,
+                queryYear,
+                sessions.stream()
+                        .map(s -> new CalendarDTO.CalendarDayDTO(
+                                s.getId(),
+                                s.getEndedAt().getDayOfMonth(),
+                                prSessionIds.contains(s.getId())
+                        ))
                         .collect(Collectors.toList())
         );
     }

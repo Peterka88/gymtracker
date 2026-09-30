@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +27,16 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
         ORDER BY s.startedAt DESC
         """)
     Page<WorkoutSession> findSessionsForExercise(@Param("exerciseId") Long exerciseId, @Param("userId") Long userId, Pageable pageable);
+
+    interface WorkoutSessionDayProjection {
+        Long getId();
+        LocalDateTime getEndedAt();
+    }
+
+    @Query("""
+        SELECT s.id AS id, s.endedAt AS endedAt FROM WorkoutSession s
+        WHERE s.appUser.id = :userId AND EXTRACT(YEAR FROM s.endedAt) = :queryYear AND EXTRACT(MONTH FROM s.endedAt) = :queryMonth
+        ORDER BY s.endedAt
+        """)
+    List<WorkoutSessionDayProjection> findAllByAppUserIdAndMonthAndYear(@Param("userId") Long userId, @Param("queryMonth") int queryMonth, @Param("queryYear") int queryYear);
 }
