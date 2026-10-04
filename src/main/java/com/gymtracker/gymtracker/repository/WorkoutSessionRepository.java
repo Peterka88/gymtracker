@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, Long> {
     List<WorkoutSession> findAllByAppUserIdOrderByStartedAtDesc(Long userId, Pageable pageable);
 
+    Integer countByAppUserIdAndEndedAtAfter(Long userId, LocalDateTime since);
+
     Optional<WorkoutSession> findByAppUserIdAndId(Long appUserId, Long id);
 
     Optional<WorkoutSession> findByAppUserIdAndEndedAtIsNull(Long appUserId);
@@ -28,6 +30,8 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
         """)
     Page<WorkoutSession> findSessionsForExercise(@Param("exerciseId") Long exerciseId, @Param("userId") Long userId, Pageable pageable);
 
+    WorkoutSession findTopByAppUserIdAndEndedAtIsNotNullOrderByEndedAtDesc(Long id);
+
     interface WorkoutSessionDayProjection {
         Long getId();
         LocalDateTime getEndedAt();
@@ -39,4 +43,12 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
         ORDER BY s.endedAt
         """)
     List<WorkoutSessionDayProjection> findAllByAppUserIdAndMonthAndYear(@Param("userId") Long userId, @Param("queryMonth") int queryMonth, @Param("queryYear") int queryYear);
+
+
+    @Query("""
+        SELECT s.id AS id, s.endedAt AS endedAt FROM WorkoutSession s
+        WHERE s.appUser.id = :userId AND EXTRACT(YEAR FROM s.endedAt) = :queryYear
+        ORDER BY s.endedAt
+        """)
+    List<WorkoutSessionDayProjection> findAllByAppUserIdAndYear(@Param("userId") Long userId, @Param("queryYear") int queryYear);
 }

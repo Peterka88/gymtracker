@@ -1,10 +1,12 @@
 package com.gymtracker.gymtracker.repository;
 
+import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.entity.SessionExercise;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,4 +41,19 @@ public interface SessionExerciseRepository extends JpaRepository<SessionExercise
     Integer countSessionExerciseBySessionId(Long sessionId);
 
     void deleteByExerciseId(Long exerciseId);
+
+    interface MuscleGroupLastTrainedProjection {
+        MuscleGroup getMuscleGroup();
+        LocalDateTime getLastTrainedAt();
+    }
+
+    @Query("""
+        SELECT e.muscleGroup AS muscleGroup, MAX(s.endedAt) AS lastTrainedAt
+        FROM SessionExercise se
+        JOIN se.session s
+        JOIN se.exercise e
+        WHERE s.appUser.id = :userId AND s.endedAt IS NOT NULL
+        GROUP BY e.muscleGroup
+    """)
+    List<MuscleGroupLastTrainedProjection> findLastTrainedByMuscleGroup(@Param("userId") Long userId);
 }

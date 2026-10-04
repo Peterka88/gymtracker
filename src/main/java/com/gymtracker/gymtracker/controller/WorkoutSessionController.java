@@ -3,10 +3,7 @@ package com.gymtracker.gymtracker.controller;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.LocationPatchReqDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.*;
-import com.gymtracker.gymtracker.dto.workoutSession.CalendarDTO;
-import com.gymtracker.gymtracker.dto.workoutSession.LocationDTO;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
+import com.gymtracker.gymtracker.dto.workoutSession.*;
 import com.gymtracker.gymtracker.security.AppUserPrincipal;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,10 +77,10 @@ public class WorkoutSessionController {
         return ResponseEntity.ok(workoutSessionService.getCalendarView(principal.getId(), month, year));
     }
 
-//    @GetMapping("/stats")
-//    public ResponseEntity<> statsView(@AuthenticationPrincipal AppUserPrincipal principal){
-//        return ResponseEntity.ok();
-//    }
+    @GetMapping("/stats")
+    public ResponseEntity<StatsDTO> statsView(@AuthenticationPrincipal AppUserPrincipal principal){
+        return ResponseEntity.ok(workoutSessionService.getStats(principal.getId()));
+    }
 
     @Operation(summary = "Get workout session detail with all sets")
     @ApiResponse(responseCode = "200", description = "Session detail including workout sets")

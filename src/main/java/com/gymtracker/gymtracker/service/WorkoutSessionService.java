@@ -6,11 +6,9 @@ import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.SessionExerciseN
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.*;
 import com.gymtracker.gymtracker.dto.sessionExercise.SessionExerciseResponse;
-import com.gymtracker.gymtracker.dto.workoutSession.CalendarDTO;
-import com.gymtracker.gymtracker.dto.workoutSession.LocationDTO;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
+import com.gymtracker.gymtracker.dto.workoutSession.*;
 import com.gymtracker.gymtracker.entity.Location;
+import com.gymtracker.gymtracker.entity.MuscleGroup;
 import com.gymtracker.gymtracker.entity.SessionExercise;
 import com.gymtracker.gymtracker.entity.WorkoutSession;
 import com.gymtracker.gymtracker.repository.SessionExerciseRepository;
@@ -26,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,6 +117,44 @@ public class WorkoutSessionService {
                         ))
                         .collect(Collectors.toList())
         );
+    }
+
+    public StatsDTO getStats(Long id) {
+        LocalDateTime last30Days = LocalDateTime.now().minusDays(30);
+        Integer workoutsLast30Days = workoutSessionRepository.countByAppUserIdAndEndedAtAfter(id, last30Days);
+        Integer workoutsThisYear = workoutSessionRepository.findAllByAppUserIdAndYear(id, LocalDateTime.now().getYear()).size();
+        Integer prsLast30Days = personalRecordsService.countPrsSince(id, last30Days);
+        StatsDTO.NeglectedMuscleGroupDTO neglectedMuscleGroup = findNeglectedMuscleGroup(id);
+        WorkoutSession lastWorkoutSession = workoutSessionRepository.findTopByAppUserIdAndEndedAtIsNotNullOrderByEndedAtDesc(id);
+
+        return new StatsDTO(
+                workoutsLast30Days,
+                workoutsThisYear,
+                prsLast30Days,
+                neglectedMuscleGroup,
+                lastWorkoutSession != null ? Math.toIntExact(ChronoUnit.DAYS.between(lastWorkoutSession.getEndedAt().toLocalDate(), LocalDateTime.now().toLocalDate())) : null
+        );
+    }
+
+    private StatsDTO.NeglectedMuscleGroupDTO findNeglectedMuscleGroup(Long userId) {
+        Map<MuscleGroup, LocalDateTime> lastTrained = sessionExerciseRepository.findLastTrainedByMuscleGroup(userId).stream()
+                .collect(Collectors.toMap(
+                        SessionExerciseRepository.MuscleGroupLastTrainedProjection::getMuscleGroup,
+                        SessionExerciseRepository.MuscleGroupLastTrainedProjection::getLastTrainedAt
+                ));
+
+        // Never-trained groups (missing from the map) sort first.
+        return Arrays.stream(MuscleGroup.values())
+                .filter(mg -> mg != MuscleGroup.FULL_BODY && mg != MuscleGroup.FOREARMS && mg != MuscleGroup.CALVES && mg != MuscleGroup.TRAPS)
+                .min(Comparator.comparing(lastTrained::get, Comparator.nullsFirst(Comparator.naturalOrder())))
+                .map(mg -> {
+                    LocalDateTime last = lastTrained.get(mg);
+                    Integer days = last != null
+                            ? Math.toIntExact(ChronoUnit.DAYS.between(last.toLocalDate(), LocalDate.now()))
+                            : null;
+                    return new StatsDTO.NeglectedMuscleGroupDTO(mg, days);
+                })
+                .orElse(null);
     }
 
     public WorkoutSessionStartResult createWorkoutSession(Long userId) {

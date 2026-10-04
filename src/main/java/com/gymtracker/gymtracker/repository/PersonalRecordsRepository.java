@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,4 +33,13 @@ public interface PersonalRecordsRepository extends JpaRepository<PersonalRecord,
     List<Long> findWorkoutSetIdsByAppUserIdAndSessionId(@Param("userId") Long userId, @Param("workoutSessionId") Long workoutSessionId);
 
     void deleteByWorkoutSetId(Long setId);
+
+    @Query("""
+        SELECT COUNT(pr) FROM PersonalRecord pr
+        JOIN pr.workoutSet ws
+        JOIN ws.sessionExercise se
+        JOIN se.session s
+        WHERE pr.appUser.id = :userId AND s.endedAt >= :since
+    """)
+    Integer countPrsSince(@Param("userId") Long userId, @Param("since") LocalDateTime since);
 }
