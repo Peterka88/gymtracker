@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -81,5 +82,9 @@ public class PersonalRecordsService {
 
     public Set<Long> getSessionIdsWithPr(Long userId) {
         return Set.copyOf(personalRecordsRepository.findSessionIdsWithPrForUser(userId));
+    }
+
+    public Integer countPrsSince(Long userId, LocalDateTime since) {
+        return personalRecordsRepository.countPrsSince(userId, since);
     }
 }

@@ -65,7 +65,7 @@ class WorkoutSetRepositoryIT {
         Exercise benchPress = exerciseRepository.save(
                 Exercise.builder().name("Bench Press").muscleGroup(MuscleGroup.CHEST).build());
         Exercise squat = exerciseRepository.save(
-                Exercise.builder().name("Squat").muscleGroup(MuscleGroup.QUADRICEPS).build());
+                Exercise.builder().name("Squat").muscleGroup(MuscleGroup.LEGS).build());
 
         saveSessionWithSet(user, benchPress, LocalDateTime.of(2026, 7, 1, 10, 0), 60.0);
         saveSessionWithSet(user, benchPress, LocalDateTime.of(2026, 7, 10, 10, 0), 70.0);

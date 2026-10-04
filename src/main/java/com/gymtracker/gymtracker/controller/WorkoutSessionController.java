@@ -3,9 +3,7 @@ package com.gymtracker.gymtracker.controller;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.LocationPatchReqDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.requests.WorkoutSessionPatchDTO;
 import com.gymtracker.gymtracker.dto.newWorkoutSession.responses.*;
-import com.gymtracker.gymtracker.dto.workoutSession.LocationDTO;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionDetailResponse;
-import com.gymtracker.gymtracker.dto.workoutSession.WorkoutSessionResponse;
+import com.gymtracker.gymtracker.dto.workoutSession.*;
 import com.gymtracker.gymtracker.security.AppUserPrincipal;
 import com.gymtracker.gymtracker.service.WorkoutSessionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,6 +66,20 @@ public class WorkoutSessionController {
             @Parameter(description = "Page number, defaults to 0") @RequestParam(required = false) Integer page
     ) {
         return ResponseEntity.ok(workoutSessionService.getWorkoutSessions(principal.getId(), size, page));
+    }
+
+    @GetMapping("/calendar")
+    public ResponseEntity<CalendarDTO> calendarView(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
+    ){
+        return ResponseEntity.ok(workoutSessionService.getCalendarView(principal.getId(), month, year));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<StatsDTO> statsView(@AuthenticationPrincipal AppUserPrincipal principal){
+        return ResponseEntity.ok(workoutSessionService.getStats(principal.getId()));
     }
 
     @Operation(summary = "Get workout session detail with all sets")
