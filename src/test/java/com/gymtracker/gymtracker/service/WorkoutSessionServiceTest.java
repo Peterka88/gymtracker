@@ -104,21 +104,21 @@ public class WorkoutSessionServiceTest {
     void getWorkoutSessions_appliesExplicitPageAndSize_fromParams(){
         workoutSessionService.getWorkoutSessions(99L,5,3);
 
-        verify(workoutSessionRepository).findAllByAppUserIdOrderByStartedAtDesc(99L, PageRequest.of(3,5));
+        verify(workoutSessionRepository).findAllByAppUserIdAndEndedAtIsNotNullOrderByStartedAtDesc(99L, PageRequest.of(3,5));
     }
 
     @Test
     void getWorkoutSessions_appliesDefaultPageAndSize_whenParamsAreNull(){
         workoutSessionService.getWorkoutSessions(99L,null,null);
 
-        verify(workoutSessionRepository).findAllByAppUserIdOrderByStartedAtDesc(99L, PageRequest.of(0,10));
+        verify(workoutSessionRepository).findAllByAppUserIdAndEndedAtIsNotNullOrderByStartedAtDesc(99L, PageRequest.of(0,10));
     }
 
     @Test
     void getWorkoutSessions_prFlagMappedCorrectly(){
         when(personalRecordsService.getSessionIdsWithPr(99L))
                 .thenReturn(Set.of(2L));
-        when(workoutSessionRepository.findAllByAppUserIdOrderByStartedAtDesc(99L, PageRequest.of(0,10)))
+        when(workoutSessionRepository.findAllByAppUserIdAndEndedAtIsNotNullOrderByStartedAtDesc(99L, PageRequest.of(0,10)))
                 .thenReturn(List.of(session(1L, "Without PR"),session(2L, "With PR")));
         when(sessionExerciseRepository.countBySessionIds(List.of(1L,2L)))
                 .thenReturn(List.of(new Object[]{1L, 3L}, new Object[]{2L, 5L}));

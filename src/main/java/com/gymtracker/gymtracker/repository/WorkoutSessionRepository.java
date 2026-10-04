@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, Long> {
-    List<WorkoutSession> findAllByAppUserIdOrderByStartedAtDesc(Long userId, Pageable pageable);
+    List<WorkoutSession> findAllByAppUserIdAndEndedAtIsNotNullOrderByStartedAtDesc(Long userId, Pageable pageable);
 
     Integer countByAppUserIdAndEndedAtAfter(Long userId, LocalDateTime since);
 
