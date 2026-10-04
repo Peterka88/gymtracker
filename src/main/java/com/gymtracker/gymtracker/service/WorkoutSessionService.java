@@ -48,7 +48,7 @@ public class WorkoutSessionService {
         Pageable pageable = PageRequest.of(page == null ? 0 : page, size);
         Set<Long> sessionIdsWithPr = personalRecordsService.getSessionIdsWithPr(userId);
 
-        List<WorkoutSession> sessions = workoutSessionRepository.findAllByAppUserIdOrderByStartedAtDesc(userId, pageable);
+        List<WorkoutSession> sessions = workoutSessionRepository.findAllByAppUserIdAndEndedAtIsNotNullOrderByStartedAtDesc(userId, pageable);
         List<Long> sessionIds = sessions.stream().map(WorkoutSession::getId).collect(Collectors.toList());
         Map<Long, Integer> exerciseCounts = countExercisesBySessionIds(sessionIds);
 

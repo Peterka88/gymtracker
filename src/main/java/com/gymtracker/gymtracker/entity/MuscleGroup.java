@@ -9,9 +9,7 @@ public enum MuscleGroup {
     TRICEPS,
     FOREARMS,
     CORE,
-    QUADRICEPS,
-    HAMSTRINGS,
-    GLUTES,
+    LEGS,
     CALVES,
     FULL_BODY
 }
