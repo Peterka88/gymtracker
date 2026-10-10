@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,6 +43,7 @@ public class WorkoutSessionService {
     private final PersonalRecordsService personalRecordsService;
     private final ExerciseService exerciseService;
     private final WorkoutSetRepository workoutSetRepository;
+    private final Clock clock;
 
     public List<WorkoutSessionResponse> getWorkoutSessions(Long userId, Integer paramSize, Integer page) {
         int size = (paramSize == null || paramSize == 0) ? DEFAULT_PAGE_SIZE : paramSize;
@@ -99,7 +101,7 @@ public class WorkoutSessionService {
     }
 
     public CalendarDTO getCalendarView(Long userId, Integer month, Integer year) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         int queryMonth = (month == null || month < 1 || month > 12) ? now.getMonthValue() : month;
         int queryYear = (year == null || year < 2020 || year > 2100) ? now.getYear() : year;
 
@@ -120,9 +122,10 @@ public class WorkoutSessionService {
     }
 
     public StatsDTO getStats(Long id) {
-        LocalDateTime last30Days = LocalDateTime.now().minusDays(30);
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDateTime last30Days = now.minusDays(30);
         Integer workoutsLast30Days = workoutSessionRepository.countByAppUserIdAndEndedAtAfter(id, last30Days);
-        Integer workoutsThisYear = workoutSessionRepository.findAllByAppUserIdAndYear(id, LocalDateTime.now().getYear()).size();
+        Integer workoutsThisYear = workoutSessionRepository.findAllByAppUserIdAndYear(id, now.getYear()).size();
         Integer prsLast30Days = personalRecordsService.countPrsSince(id, last30Days);
         StatsDTO.NeglectedMuscleGroupDTO neglectedMuscleGroup = findNeglectedMuscleGroup(id);
         WorkoutSession lastWorkoutSession = workoutSessionRepository.findTopByAppUserIdAndEndedAtIsNotNullOrderByEndedAtDesc(id);
@@ -132,7 +135,7 @@ public class WorkoutSessionService {
                 workoutsThisYear,
                 prsLast30Days,
                 neglectedMuscleGroup,
-                lastWorkoutSession != null ? Math.toIntExact(ChronoUnit.DAYS.between(lastWorkoutSession.getEndedAt().toLocalDate(), LocalDateTime.now().toLocalDate())) : null
+                lastWorkoutSession != null ? Math.toIntExact(ChronoUnit.DAYS.between(lastWorkoutSession.getEndedAt().toLocalDate(), now.toLocalDate())) : null
         );
     }
 
@@ -150,7 +153,7 @@ public class WorkoutSessionService {
                 .map(mg -> {
                     LocalDateTime last = lastTrained.get(mg);
                     Integer days = last != null
-                            ? Math.toIntExact(ChronoUnit.DAYS.between(last.toLocalDate(), LocalDate.now()))
+                            ? Math.toIntExact(ChronoUnit.DAYS.between(last.toLocalDate(), LocalDate.now(clock)))
                             : null;
                     return new StatsDTO.NeglectedMuscleGroupDTO(mg, days);
                 })
@@ -164,7 +167,7 @@ public class WorkoutSessionService {
         }
 
         var appUser = appUserService.getAppUserById(userId);
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
 
         WorkoutSession session = new WorkoutSession();
         session.setName(now.toLocalDate().toString());
@@ -192,7 +195,7 @@ public class WorkoutSessionService {
             throw new IllegalArgumentException("Workout session already finished");
         }
 
-        session.setEndedAt(LocalDateTime.now());
+        session.setEndedAt(LocalDateTime.now(clock));
         session.setDurationMinutes((int) Duration.between(session.getStartedAt(), session.getEndedAt()).toMinutes());
         return WorkoutSessionFinishResDTO.from(workoutSessionRepository.save(session));
     }

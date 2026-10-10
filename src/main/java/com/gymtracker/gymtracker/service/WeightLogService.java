@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ public class WeightLogService {
 
     private final WeightLogRepository weightLogRepository;
     private final AppUserService appUserService;
+    private final Clock clock;
 
     public WeightLogResponseDTO create(Long userId, WeightLogRequestDTO dto) {
         var user = appUserService.getAppUserById(userId);
@@ -28,7 +30,7 @@ public class WeightLogService {
         WeightLog log = new WeightLog();
         log.setUser(user);
         log.setWeight(dto.weight());
-        log.setLoggedAt(LocalDateTime.now());
+        log.setLoggedAt(LocalDateTime.now(clock));
         return WeightLogResponseDTO.from(weightLogRepository.save(log));
     }
 
